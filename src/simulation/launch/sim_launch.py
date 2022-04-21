@@ -28,15 +28,15 @@ def gen_robot_list(number_of_robots):
 def generate_launch_description():
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
-    package_description = "simulation"
+    package_description = get_package_share_directory('simulation')
 
     # We have to change this to our own package and model when we get it
     robot_urdf_name = "turtlebot3_" + MODEL_CONSTANT + ".urdf"
-    robot_urdf = os.path.join(get_package_share_directory('simulation'), 'robot', robot_urdf_name)
+    robot_urdf = os.path.join(get_package_share_directory('turtlebot3_description'), 'urdf', robot_urdf_name)
     assert os.path.exists(robot_urdf), "turtlebot3_waffle_pi.urdf doesnt exist in "+str(robot_urdf)
 
     #Names and poses of the robots
-    robots = gen_robot_list(4)
+    robots = gen_robot_list(2)
 
     #List of spawn robot commands
     spawn_robots_cmds = []
@@ -48,7 +48,7 @@ def generate_launch_description():
     #-------------------------------------------------------------Launch gazebo------------------------------------------------------------------------#
 
     gz_server = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource( os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(pkg_gazebo_ros, 'launch', 'gzserver.launch.py')),
         launch_arguments={'world': world, "verbose": "true"}.items()
     )
 

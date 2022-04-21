@@ -14,11 +14,10 @@ def main(args=None):
     if sys.argv[1] is not None:
         with open(sys.argv[1], 'r') as content_file:
             content = content_file.read()
-
+    
     req = SpawnEntity.Request()
-    req.name = "robot"
+    req.name = sys.argv[2]
     req.xml = content
-    req.robot_namespace = ""
     req.reference_frame = "world"
 
     while not cli.wait_for_service(timeout_sec=1.0):

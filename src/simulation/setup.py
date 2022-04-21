@@ -25,7 +25,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-
+            'spawn_robot_srv = simulation.spawn_robot_srv:main',
         ],
     },
 )
