@@ -32,11 +32,11 @@ def generate_launch_description():
 
     # We have to change this to our own package and model when we get it
     robot_urdf_name = "turtlebot3_" + MODEL_CONSTANT + ".urdf"
-    robot_urdf = os.path.join(get_package_share_directory('turtlebot3_description'), 'urdf', robot_urdf_name)
-    assert os.path.exists(robot_urdf), "Thebox_bot.urdf doesnt exist in "+str(robot_urdf)
+    robot_urdf = os.path.join(get_package_share_directory('simulation'), 'robot', robot_urdf_name)
+    assert os.path.exists(robot_urdf), "turtlebot3_waffle_pi.urdf doesnt exist in "+str(robot_urdf)
 
     #Names and poses of the robots
-    robots = gen_robot_list(5)
+    robots = gen_robot_list(4)
 
     #List of spawn robot commands
     spawn_robots_cmds = []
@@ -58,6 +58,7 @@ def generate_launch_description():
 
     #-------------------------------------------------------------Launch RVIZ-----------------------------------------------------------------------------#
     # RVIZ Configuration
+    """
     rviz_config_dir = os.path.join(get_package_share_directory(
         package_description), 'rviz', 'simulation.rviz')
 
@@ -68,6 +69,7 @@ def generate_launch_description():
         name='rviz_node',
         parameters=[{'use_sim_time': True}],
         arguments=['-d', rviz_config_dir])
+    """
 
     #--------------------------------------------------------------Robot spawning------------------------------------------------------------------------#
     for robot in robots:
@@ -86,20 +88,10 @@ def generate_launch_description():
             )
         )
 
-    #--------------------------------------------------------------Robot state publisher------------------------------------------------------------------#
-    
-    robot_state = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        parameters=[{'use_sim_time': use_sim_time}],
-        arguments=[robot_urdf]
-    )
-
-
     ld = LaunchDescription()
     ld.add_action(gz_server)
     ld.add_action(gz_client)   
-    ld.add_action(rviz_node) 
-    ld.add_action(robot_state)
+    #ld.add_action(rviz_node) 
+    for spawn_robot_cmd in spawn_robots_cmds:
+        ld.add_action(spawn_robot_cmd)
     return ld
