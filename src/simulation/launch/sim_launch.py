@@ -32,7 +32,7 @@ def generate_launch_description():
 
     # We have to change this to our own package and model when we get it
     robot_urdf_name = "turtlebot3_" + MODEL_CONSTANT + ".urdf"
-    robot_urdf = os.path.join(get_package_share_directory('turtlebot3_description'), 'urdf', robot_urdf_name)
+    robot_urdf = os.path.join(get_package_share_directory('simulation'), 'urdf', robot_urdf_name)
     assert os.path.exists(robot_urdf), "turtlebot3_waffle_pi.urdf doesnt exist in "+str(robot_urdf)
 
     #Names and poses of the robots
@@ -72,26 +72,13 @@ def generate_launch_description():
     """
 
     #--------------------------------------------------------------Robot spawning------------------------------------------------------------------------#
-    for robot in robots:
-        print("#Spawned: " + str(robot))
-        spawn_robots_cmds.append(
-            IncludeLaunchDescription(
-                PythonLaunchDescriptionSource(os.path.join(package_description, 'launch', 'spawn_robot_launch.py')),
-                launch_arguments={
-                    'robot_urdf': robot_urdf,
-                    'x': TextSubstitution(text=str(robot['x_pose'])),
-                    'y': TextSubstitution(text=str(robot['y_pose'])),
-                    'z': TextSubstitution(text=str(robot['z_pose'])),
-                    'robot_name': robot['name'],
-                    'robot_namespace': robot['name']
-                }.items()
-            )
+    
+    test = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(os.path.join(package_description, 'launch', 'spawn_launch.py'))
         )
 
     ld = LaunchDescription()
     ld.add_action(gz_server)
     ld.add_action(gz_client)   
-    #ld.add_action(rviz_node) 
-    for spawn_robot_cmd in spawn_robots_cmds:
-        ld.add_action(spawn_robot_cmd)
+    ld.add_action(test)
     return ld

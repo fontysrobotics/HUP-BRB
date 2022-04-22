@@ -1,3 +1,4 @@
+from math import ldexp
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
@@ -13,6 +14,9 @@ def generate_launch_description():
 
     urdf = os.path.join(get_package_share_directory('turtlebot3_description'), 'urdf', 'turtlebot3_waffle_pi.urdf')
     assert os.path.exists(urdf), "turtlebot3_waffle_pi.urdf doesnt exist in "+str(urdf)
+
+    sdf = os.path.join(get_package_share_directory('simulation'), 'models/turtlebot3_waffle_pi', 'model.sdf')
+    
     
     with open(urdf, 'r') as infp:
         robot_desc = infp.read()
@@ -36,3 +40,4 @@ def generate_launch_description():
             parameters=[{'use_sim_time': use_sim_time, 'robot_description': robot_desc}],
             arguments=[urdf]),
     ])
+    
