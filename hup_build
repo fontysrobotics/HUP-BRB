@@ -1,0 +1,5 @@
+#!/bin/sh
+# Builds and sources everything
+
+cd ~/hupbrb_ws
+colcon build
