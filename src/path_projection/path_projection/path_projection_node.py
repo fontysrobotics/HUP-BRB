@@ -12,7 +12,7 @@ class MinimalSubscriber(Node):
 
     def __init__(self):
         super().__init__('minimal_subscriber')
-        self.path_subscription = self.create_subscription(Path, '/plan', self.listener_callback, 10)
+        self.path_subscription = self.create_subscription(Path, '/dede1/plan', self.listener_callback, 10)
         self.path_subscription  # prevent unused variable warning
         self.map_subscription = self.create_subscription(OccupancyGrid, '/map', self.map_callback, 10)
         self.map_subscription
