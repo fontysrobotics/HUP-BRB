@@ -4,3 +4,4 @@ install/
 .vs/
 .vscode/*
 !.vscode/tasks.json
+*.pyc
