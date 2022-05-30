@@ -75,7 +75,7 @@ local_costmap:
       width: 20
       height: 20
       resolution: 0.05
-      plugins: ["obstacle_layer", "inflation_layer"]
+      plugins: ["obstacle_layer", "inflation_layer", "robot_collision"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 10.0
@@ -94,4 +94,7 @@ local_costmap:
           raytrace_min_range: 0.1
           obstacle_max_range: 10.0
           obstacle_min_range: 0.1
+      robot_collision:
+        plugin: priority_based_robot_costmap_plugin/RobotCollisionLayer
+        enabled: True
       always_send_full_costmap: True
