@@ -24,7 +24,7 @@ class Scanner(Node):
         	self.camera_input,
             qos_profile_sensor_data,
             )
-        self.srv = self.create_publisher(Identifier, 'scanned_ids', 10)
+        self.id_publisher = self.create_publisher(Identifier, 'scanned_ids', 10)
 
     def camera_input(self, message: Image):
         self.get_logger().debug("Received camera input")
@@ -41,7 +41,7 @@ class Scanner(Node):
                 # or an empty string if no QR code is detected
                 msg = Identifier()
                 msg.id = qr_text
-                self.srv.publish(msg)
+                self.id_publisher.publish(msg)
 
         except cv2.error:
             self.get_logger().warn("Something went wrong with cv2")

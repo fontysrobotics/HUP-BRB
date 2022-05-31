@@ -1,0 +1,3 @@
+string id
+uint8 priority
+uint8 radius

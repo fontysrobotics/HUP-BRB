@@ -6,22 +6,36 @@ from scipy import interpolate
 from scipy.spatial.transform import Rotation
 
 from nav_msgs.msg import Path, OccupancyGrid, Odometry
+from hupbrb_msgs.msg import RobotInformation
 
 
-class MinimalSubscriber(Node):
+class PathProjection(Node):
 
     def __init__(self):
-        super().__init__('minimal_subscriber')
+        super().__init__('path_projection')
         self.path_subscription = self.create_subscription(Path, '/dede1/plan', self.listener_callback, 10)
-        self.path_subscription  # prevent unused variable warning
+
         self.map_subscription = self.create_subscription(OccupancyGrid, '/map', self.map_callback, 10)
-        self.map_subscription
+
         self.robotlocation_subscription = self.create_subscription(Odometry, '/odom', self.location_callback, 10)
-        self.robotlocation_subscription
+
+        self.robotinformation_subscription = self.create_subscription(RobotInformation, '/robot_info', self.robot_info_callback, 10)
         
         self.RobotLocation = None
         self.RobotOrientation = None
+        self.robots = []
 
+    def robot_info_callback(self, msg: RobotInformation):
+        robot = RobotInformation()
+        robot.id = msg.id
+        robot.priority = msg.priority
+        robot.radius = msg.radius
+        
+        for r in self.robots:
+            if (robot.id == r.id):
+                r.priority = robot.priority
+                return
+        self.robots.append(robot)
 
     def listener_callback(self, msg: Path):
         window_x = 1280
@@ -114,14 +128,14 @@ def scale_coordinates(x, y):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_subscriber = MinimalSubscriber()
+    path_projection_node = PathProjection()
 
-    rclpy.spin(minimal_subscriber)
+    rclpy.spin(path_projection_node)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    minimal_subscriber.destroy_node()
+    path_projection_node.destroy_node()
     rclpy.shutdown()
 
 

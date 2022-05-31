@@ -36,7 +36,7 @@ def generate_launch_description():
     # Define robots
     robot_define = [
         {"name" : "dede1",
-        "robot_pose" : [1.0, 1.0, 0.1],
+        "robot_pose" : [4.0, 3.0, 0.1],
         "slam": "localization.yaml",
         "controller": "controller_dwb.yaml",
         "planner": "planner.yaml",
@@ -45,7 +45,7 @@ def generate_launch_description():
         "bt_navigator_tree": "navigate_w_replanning_and_recovery.xml",
         "waypoint_follower" : "waypoint.yaml"},
         {"name" : "dede2",
-        "robot_pose" : [2.0, 1.0, 0.1],
+        "robot_pose" : [7.0, 3.0, 0.1],
         "slam": "localization.yaml",
         "controller": "controller_dwb.yaml",
         "planner": "planner.yaml",
