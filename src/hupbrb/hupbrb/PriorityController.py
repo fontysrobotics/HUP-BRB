@@ -81,6 +81,9 @@ class PriorityController(Node):
 
 
     def scanned_id_callback(self, msg: Identifier):
+        if msg.name in self.robots:
+            self.get_logger().debug(f"Connection already established between {self.info.name} (local) and {msg.name} (remote)")
+            return
         self.get_logger().info(f"Initializing communication between {self.info.name} (local) and {msg.name} (remote)")
         self.cli = self.create_client(Handshake, f"{msg.name}/handshake")                                          #Maybe make this part a seperate node???
         while not self.cli.wait_for_service(timeout_sec=1.0):
