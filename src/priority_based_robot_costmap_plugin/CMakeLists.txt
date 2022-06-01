@@ -33,26 +33,48 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
+
+
+
+include_directories(
+  include
+  ${EIGEN3_INCLUDE_DIRS}
+  )
+
+add_library(${lib_name} SHARED
+            src/robot_collision_layer.cpp)
+            
 
 set(dep_pkgs
     rclcpp
     nav2_costmap_2d
-    pluginlib)
+    pluginlib
+    tf2_geometry_msgs
+    tf2
+    tf2_ros
+    tf2_sensor_msgs)
 
-# === Build ===
-
-add_library(${lib_name} SHARED
-            src/robot_collision_layer.cpp)
-include_directories(include)
-
-# === Installation ===
+ament_target_dependencies(${lib_name}
+  ${dep_pkgs})
 
 install(TARGETS ${lib_name}
         DESTINATION lib)
+
+install(FILES robot_collision_layer.xml
+  DESTINATION share/${PROJECT_NAME}
+)
+
+install(DIRECTORY include/
+  DESTINATION include/
+)
 
 # pluginlib_export_plugin_description_file() installs robot_collision_layer.xml
 # file into "share" directory and sets ament indexes for it.
 # This allows the plugin to be discovered as a plugin of required type.
 pluginlib_export_plugin_description_file(nav2_costmap_2d robot_collision_layer.xml)
-ament_target_dependencies(${lib_name} ${dep_pkgs})
+
 ament_package()
