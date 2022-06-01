@@ -2,6 +2,8 @@ import rclpy
 from rclpy.node import Node
 import os
 
+from .collision import plot_distance
+
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Path, OccupancyGrid, Odometry
@@ -36,8 +38,10 @@ class PriorityController(Node):
             if not "subscriptions" in self.robots[bot]:             
                 self.robots[bot] = self.subscribe_to_bot(bot)
 
+            available = lambda sub: (sub in self.robots[bot]['results'] and sub in self.sub['results'])
+
             if self.robots[bot]['results'].items():
-                if "odom" in self.robots[bot]['results'] and "odom" in self.sub['results']:
+                if available("odom"):
                     msg1 : Odometry = self.sub['results']['odom']
                     msg2 : Odometry = self.robots[bot]['results']['odom']
                     x1 = msg1.pose.pose.position.x
@@ -53,6 +57,18 @@ class PriorityController(Node):
                         self.get_logger().info(f"Distance = {dist} > 10.0\nUnsubscribing...")
                         self.kill_bot(bot)
                         break
+
+                if available("plan") and available("odom"):
+                    x1 = [pose.pose.position.x for pose in self.sub['results']['plan'].poses]
+                    y1 = [pose.pose.position.y for pose in self.sub['results']['plan'].poses]
+                    x2 = [pose.pose.position.x for pose in self.robots[bot]['results']['plan'].poses]
+                    y2 = [pose.pose.position.y for pose in self.robots[bot]['results']['plan'].poses]
+
+                    v1 = self.sub['results']['odom'].twist.twist.linear
+                    v2 = self.robots[bot]['results']['odom'].twist.twist.linear
+
+                    plot_distance(x1, y1, v1, x2, y2, v2)
+
                 # self.get_logger().info(str(bot['results']))
 
     def subscribe_to_bot(self, name):
