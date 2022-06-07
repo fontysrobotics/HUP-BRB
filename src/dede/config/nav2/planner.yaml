@@ -20,7 +20,7 @@ global_costmap:
       robot_base_frame: base_link
       resolution: 0.05
       track_unknown_space: true
-      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer", "robot_collision"]
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
         enabled: True
@@ -35,8 +35,14 @@ global_costmap:
           raytrace_min_range: 0.1
           obstacle_max_range: 10.0
           obstacle_min_range: 0.0
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: True
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 10.0
         inflation_radius: 0.25
+      robot_collision:
+        plugin: "priority_based_robot_costmap_plugin/RobotCollisionLayer"
+        enabled: True
       always_send_full_costmap: True

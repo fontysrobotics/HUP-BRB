@@ -6,6 +6,9 @@
 #include "nav2_costmap_2d/layer.hpp"
 #include "nav2_costmap_2d/layered_costmap.hpp"
 #include "nav2_costmap_2d/costmap_layer.hpp"
+#include "rclcpp/rclcpp.hpp"
+
+#include "geometry_msgs/msg/point.hpp"
 
 namespace priority_based_robot_costmap_plugin
 {
@@ -46,6 +49,11 @@ private:
   int GRADIENT_SIZE = 20;
   // Step of increasing cost per one cell in gradient
   int GRADIENT_FACTOR = 10;
+
+  double collision_x, collision_y;
+
+  void topic_callback(const geometry_msgs::msg::Point::SharedPtr msg);
+  rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr subscription_;
 };
 
 }  // namespace priority_based_robot_costmap_plugin
