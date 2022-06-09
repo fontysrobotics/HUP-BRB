@@ -14,13 +14,23 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
         (os.path.join('share', package_name, 'worlds'), glob('worlds/*.model')),
+        (os.path.join('share', package_name, 'worlds'), glob('worlds/*.world')),
         (os.path.join('share', package_name, 'urdf'), glob('urdf/*.urdf')),
         (os.path.join('share', package_name, 'config/slam'), glob('config/slam/*.yaml')),
         (os.path.join('share', package_name, 'config/nav2'), glob('config/nav2/*.yaml')),
 
         # Model files
-        (os.path.join('share', package_name, 'models/dede'), glob('models/dede/*.config')),
-        (os.path.join('share', package_name, 'models/dede'), glob('models/dede/*.sdf')),
+        (os.path.join('share', package_name, 'models/dede'), glob('models/dede/*.*')),
+        (os.path.join('share', package_name, 'models/workcell'), glob('models/workcell/*.*')),
+        (os.path.join('share', package_name, 'models/workcell/meshes'), glob('models/workcell/meshes/*.*')),
+        (os.path.join('share', package_name, 'models/workcell/meshes'), glob('models/workcell/materials/textures/*.*')),
+
+        (os.path.join('share', package_name, 'models/workcell_bin'), glob('models/workcell_bin/*.*')),
+        (os.path.join('share', package_name, 'models/workcell_bin/meshes'), glob('models/workcell_bin/meshes/*.*')),
+        (os.path.join('share', package_name, 'models/workcell_bin/meshes'), glob('models/workcell_bin/materials/textures/*.*')),
+
+
+        (os.path.join('share', package_name, 'models/dede'), glob('models/dede/*.*')),
         (os.path.join('share', package_name, 'models/dede/meshes'), glob('models/dede/meshes/*.stl')),
         (os.path.join('share', package_name, 'models/dede_maze'), glob('models/dede_maze/*.config')),
         (os.path.join('share', package_name, 'models/dede_maze'), glob('models/dede_maze/*.sdf')),

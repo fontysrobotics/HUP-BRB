@@ -9,7 +9,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     # File paths
-    world_sdf = os.path.join(get_package_share_directory('dede'), 'worlds', 'maze_only.model')
+    world_sdf = os.path.join(get_package_share_directory('dede'), 'worlds', 'warehouse.world')
     robot_sdf = os.path.join(get_package_share_directory('dede'), 'models', 'dede', 'model.sdf')
     robot_urdf = os.path.join(get_package_share_directory('dede'), 'urdf', "dede.urdf")
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
@@ -25,8 +25,8 @@ def generate_launch_description():
 
     # Define robots
     robot_define = [
-        {"name" : "dede1", "pose_x": "4.0", "pose_y": "3.0", "pose_z": "0.1", "roll": "0.0", "pitch": "0.0", "yaw": "0.0"},
-        {"name" : "dede2", "pose_x": "7.0", "pose_y": "3.0", "pose_z": "0.1", "roll": "0.0", "pitch": "0.0", "yaw": "0.0"}
+        {"name" : "dede1", "pose_x": "4.0", "pose_y": "4.0", "pose_z": "0.1", "roll": "0.0", "pitch": "0.0", "yaw": "0.0"},
+        {"name" : "dede2", "pose_x": "8.0", "pose_y": "4.0", "pose_z": "0.1", "roll": "0.0", "pitch": "0.0", "yaw": "3.1415"},
     ]
 
     # Spawn robots
