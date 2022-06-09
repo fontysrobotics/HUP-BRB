@@ -96,8 +96,9 @@ RobotCollisionLayer::updateCosts(
         double wi, wj;
         master_grid.mapToWorld(i,j, wi,wj);
 
-      if (pow(wi-collision_x, 2)+ pow(wj-collision_y, 2) < 4) {
-        layered_costmap_->getCostmap()->setCost(i,j, 200);
+      const double radius = 0.5;
+      if (pow(wi-collision_x, 2)+ pow(wj-collision_y, 2) < radius*radius) {
+        layered_costmap_->getCostmap()->setCost(i,j, 230);
       }
     }
   }
