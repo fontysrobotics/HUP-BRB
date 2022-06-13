@@ -8,6 +8,7 @@
 #include "nav2_costmap_2d/costmap_layer.hpp"
 #include "rclcpp/rclcpp.hpp"
 
+#include "hupbrb_msgs/msg/collision.hpp"
 #include "geometry_msgs/msg/point.hpp"
 
 namespace priority_based_robot_costmap_plugin
@@ -41,9 +42,13 @@ public:
 private:
   double last_min_x_, last_min_y_, last_max_x_, last_max_y_;
   double robot_x_, robot_y_, robot_yaw_;
+  double radius_;
 
   // Indicates that the entire gradient should be recalculated next time.
   bool need_recalculation_;
+
+  bool is_enabled_;
+
 
   // Size of gradient in cells
   int GRADIENT_SIZE = 20;
@@ -52,8 +57,8 @@ private:
 
   double collision_x, collision_y;
 
-  void topic_callback(const geometry_msgs::msg::Point::SharedPtr msg);
-  rclcpp::Subscription<geometry_msgs::msg::Point>::SharedPtr subscription_;
+  void topic_callback(const hupbrb_msgs::msg::Collision::SharedPtr msg);
+  rclcpp::Subscription<hupbrb_msgs::msg::Collision>::SharedPtr subscription_;
 };
 
 }  // namespace priority_based_robot_costmap_plugin

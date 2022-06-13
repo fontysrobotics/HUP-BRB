@@ -4,6 +4,8 @@
  * https://navigation.ros.org/tutorials/docs/writing_new_costmap2d_plugin.html
  *********************************************************************/
 #include "robot_collision_layer/robot_collision_layer.hpp"
+
+#include "hupbrb_msgs/msg/collision.hpp"
 #include "geometry_msgs/msg/point.hpp"
 
 #include "rclcpp/rclcpp.hpp"
@@ -23,16 +25,21 @@ using nav2_costmap_2d::NO_INFORMATION;
 namespace priority_based_robot_costmap_plugin
 {
 
+double calcCost(double distance, double radius){
+  return 255 * ( 1 + ((radius-distance) / (radius * 0.5)));
+}
+
 RobotCollisionLayer::RobotCollisionLayer()
 : last_min_x_(-std::numeric_limits<float>::max()),
   last_min_y_(-std::numeric_limits<float>::max()),
   last_max_x_(std::numeric_limits<float>::max()),
-  last_max_y_(std::numeric_limits<float>::max())
+  last_max_y_(std::numeric_limits<float>::max()),
+  is_enabled_(false)
 {
 }
 
 // This method is called at the end of plugin initialization.
-// It contains ROS parameter(s) declaration and initialization
+// It contains ROS parameter(s) declaration and initializatidon
 // of need_recalculation_ variable.
 void
 RobotCollisionLayer::onInitialize()
@@ -43,15 +50,17 @@ RobotCollisionLayer::onInitialize()
   need_recalculation_ = false;
   current_ = true;
   
-  subscription_ = node_->create_subscription<geometry_msgs::msg::Point>(
+  subscription_ = node_->create_subscription<hupbrb_msgs::msg::Collision>(
     "collision_point", 10, std::bind(&RobotCollisionLayer::topic_callback, this, std::placeholders::_1));
 }
 
-void RobotCollisionLayer::topic_callback(const geometry_msgs::msg::Point::SharedPtr msg)
+void RobotCollisionLayer::topic_callback(const hupbrb_msgs::msg::Collision::SharedPtr msg)
 {
-  RCLCPP_INFO(node_->get_logger(), "Collision expected at: '%lf, %lf'", msg->x, msg->y);
-  collision_x = msg->x;
-  collision_y = msg->y;
+  RCLCPP_INFO(node_->get_logger(), "Collision expected at: '%lf, %lf'", msg->point.x, msg->point.y);
+  collision_x = msg->point.x;
+  collision_y = msg->point.y;
+  radius_ = msg->radius;
+  is_enabled_ = msg->enabled;
 }
 
 void
@@ -87,18 +96,32 @@ RobotCollisionLayer::updateCosts(
   int max_i,
   int max_j)
 {
+
+  if (!is_enabled_){
+    RCLCPP_DEBUG(rclcpp::get_logger(
+      "nav2_costmap_2d"), "Costmap not enabled");
+    return;
+  }
+
   RCLCPP_DEBUG(rclcpp::get_logger(
       "nav2_costmap_2d"), "RobotCollisionLayer::updateCosts: %lu, %lu, %lu, %lu",
     min_i, min_j, max_i, max_j);
   
+  auto costmap = layered_costmap_->getCostmap();
+
   for (int i = min_i; i < max_i; i++) {
     for (int j = -min_j; j < max_j; j++) {
-        double wi, wj;
-        master_grid.mapToWorld(i,j, wi,wj);
+      double wi, wj;
+      master_grid.mapToWorld(i,j, wi,wj);
 
-      if (pow(wi-collision_x, 2)+ pow(wj-collision_y, 2) < 4) {
-        layered_costmap_->getCostmap()->setCost(i,j, 200);
-      }
+      double dist = sqrt(pow(wi-collision_x, 2)+ pow(wj-collision_y, 2));
+
+      double cost = calcCost(dist, radius_);
+
+      unsigned char maxCostmap = std::clamp(cost, (double) costmap->getCost(i,j), 255.);
+
+      costmap->setCost(i,j, maxCostmap);
+
     }
   }
 }
