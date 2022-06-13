@@ -17,9 +17,8 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -32,13 +31,13 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-find_package(rosidl_default_generators REQUIRED)
-
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Priority.msg"
+  "msg/Collision.msg"
   "msg/Identifier.msg"
+  "msg/Priority.msg"
   "msg/RobotInformation.msg"
   "srv/Handshake.srv"
+  DEPENDENCIES geometry_msgs
 )
 
 ament_package()

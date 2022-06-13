@@ -1,0 +1,5 @@
+<library path="priority_based_robot_costmap_plugin_core">
+  <class name="priority_based_robot_costmap_plugin/RobotCollisionLayer" type="priority_based_robot_costmap_plugin::RobotCollisionLayer" base_class_type="nav2_costmap_2d::Layer">
+    <description>Description goes here</description>
+  </class>
+</library>
