@@ -1,8 +1,9 @@
+from cmath import inf
 import rclpy
 from rclpy.node import Node
 import os
 
-from .collision import plot_distance
+from .collision import get_collision_coords
 
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist
@@ -25,7 +26,7 @@ class PriorityController(Node):
 
         self.id_publisher = self.create_publisher(RobotInformation, 'robot_info', 10)                          #publisher for projector node
 
-        timer_period = 1.0  # seconds
+        timer_period = 0.2  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.id_subscriber = self.create_subscription(Identifier, 'scanned_ids', self.scanned_id_callback, 10)     #subscribes to get robot ID
@@ -51,9 +52,9 @@ class PriorityController(Node):
 
                     dist = (x2-x1)**2 + (y2-y1)**2
 
-                    self.get_logger().info(str(dist))
+                    self.get_logger().debug(str(dist))
 
-                    if dist > 10.0:
+                    if dist > inf:
                         self.get_logger().info(f"Distance = {dist} > 10.0\nUnsubscribing...")
                         self.kill_bot(bot)
                         break
@@ -66,8 +67,19 @@ class PriorityController(Node):
 
                     v1 = self.sub['results']['odom'].twist.twist.linear
                     v2 = self.robots[bot]['results']['odom'].twist.twist.linear
+                    
+                    collision = get_collision_coords(x1, y1, v1, x2, y2, v2, 0.5)
 
-                    plot_distance(x1, y1, v1, x2, y2, v2)
+                    if collision:
+                        x, y = collision
+                        self.get_logger().info(f"Collision at ({x}, {y}) detected!")
+
+                    # if not hasattr(self, 'plt'):
+                    #     self.plt = Graph(self.info.name)
+                    #     self.plt.update(x1, y1, v1, x2, y2, v2)
+                    #     self.plt.rescale()
+                    # else:
+                    #     self.plt.update(x1, y1, v1, x2, y2, v2)
 
                 # self.get_logger().info(str(bot['results']))
 
@@ -79,6 +91,7 @@ class PriorityController(Node):
         def add_result(sub, msg):
             # if name not in robots: robots[name] = {'results': dict()}
             resp['results'][sub] = msg
+            
         resp['subscriptions'] ={
                     'plan': self.create_subscription(Path, f"{name}/plan", lambda m: add_result('plan', m), 10),
                     'odom': self.create_subscription(Odometry, f"{name}/odom", lambda m: add_result('odom', m), 10),
