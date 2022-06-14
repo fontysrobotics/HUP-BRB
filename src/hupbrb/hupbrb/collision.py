@@ -15,7 +15,7 @@ def setup_test():
     v1 = Vector3(x=1.0)
     v2 = Vector3(x=2.0)
 
-def get_collision_coords(x1 : List[float], y1 : List[float], v1: Vector3, x2 : List[float], y2 : List[float], v2: Vector3, thres: float) ->  Union[None, Tuple[float, float]]:
+def get_collision_coords(x1 : List[float], y1 : List[float], v1: Vector3, x2 : List[float], y2 : List[float], v2: Vector3, thres: float) ->  Union[None, Tuple[float, float, float]]:
     getdist = lambda pt1, pt2: sqrt((pt1[0]-pt2[0])**2 + (pt1[1]-pt2[1])**2)
     
     dist1 = np.insert(np.cumsum(list(map(getdist, zip(x1[:-1], y1[:-1]), zip(x1[1:], y1[1:])))), 0, 0)
@@ -36,7 +36,15 @@ def get_collision_coords(x1 : List[float], y1 : List[float], v1: Vector3, x2 : L
 
     dist = np.sqrt(np.square(distx)+np.square(disty))
     # nmin = np.argmin(dist)
-    n_collision = np.argwhere(dist < thres)
+    bin_dist = np.diff(dist<thres)
+    n_end = np.argmax(bin_dist)
+
+    if n_end == 0:
+        return
+
+    n_collision = np.argmin(dist[:n_end])
+
+    # n_collision = np.argwhere(dist < thres)
 
     if not n_collision.size:
         return
@@ -45,7 +53,7 @@ def get_collision_coords(x1 : List[float], y1 : List[float], v1: Vector3, x2 : L
     x = x2[np.min(n_collision)]
     y = y2[np.min(n_collision)]
 
-    return (x, y)
+    return (x, y, dist[np.min(n_collision)])
 
     self.mindist.set_data([x1[nmin], x2[nmin]], [y1[nmin], y2[nmin]])
     self.minpt.set_data(t[nmin], dist[nmin])
@@ -73,14 +81,27 @@ class Graph():
         self.ax[1, 1].add_line(self.dist)
         self.ax[1, 1].add_line(self.minpt)
 
+        self.ax[1, 0].set_autoscalex_on(False)
+        self.ax[0, 1].set_autoscalex_on(False)
+        self.ax[1, 1].set_autoscalex_on(False)
+
+        self.ax[0, 0].set_xlim(3, 5)
+        self.ax[0, 0].set_ylim(0, 6)
+        self.ax[1, 0].set_xlim(0, 20)
+        self.ax[0, 1].set_xlim(0, 20)
+        self.ax[1, 1].set_xlim(0, 20)
+        self.ax[1, 1].set_ylim(0, 3)
+
+        self.fig.tight_layout()
         self.fig.show()
         self.fig.canvas.set_window_title(name)
         plt.pause(0.01)
         # plt.show(block=False)
 
-    def rescale(self, ax: int):
-        self.ax[0, 0].relim()
-        self.ax[0, 0].autoscale_view()
+    def rescale(self, *axes: Tuple[int, int]):
+        for a in axes:
+            self.ax[a].relim()
+            self.ax[a].autoscale_view()
         
 
     def update(self, x1 : List[float], y1 : List[float], v1: Vector3, x2 : List[float], y2 : List[float], v2: Vector3) -> None:
@@ -116,13 +137,10 @@ class Graph():
 
         # plt.draw()
 
-        self.ax[0, 1].relim()
-        self.ax[1, 0].relim()
-        self.ax[1, 1].relim()
-        
-        self.ax[0, 1].autoscale_view()
-        self.ax[1, 0].autoscale_view()
-        self.ax[1, 1].autoscale_view()
+        self.rescale(
+            (0, 1),
+            (1, 0)
+        )
 
         plt.pause(0.01)
 

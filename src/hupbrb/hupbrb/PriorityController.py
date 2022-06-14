@@ -2,14 +2,21 @@ from cmath import inf
 import rclpy
 from rclpy.node import Node
 import os
+import numpy as np
 
-from .collision import get_collision_coords
+from .collision import Graph, get_collision_coords
+
+from tf2_ros import TransformException
+from tf2_ros.transform_listener import TransformListener
+from tf2_ros.buffer import Buffer
+
+import tf_transformations as tf
 
 from std_msgs.msg import String
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, TransformStamped, Quaternion
 from nav_msgs.msg import Path, OccupancyGrid, Odometry
 from rcl_interfaces.msg import ParameterDescriptor
-from hupbrb_msgs.msg import RobotInformation, Identifier
+from hupbrb_msgs.msg import RobotInformation, Identifier, Collision
 from hupbrb_msgs.srv import Handshake
 
 class PriorityController(Node):
@@ -23,10 +30,14 @@ class PriorityController(Node):
         self.robots = dict()
 
         self.sub = self.subscribe_to_bot(self.info.name)
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
 
         self.id_publisher = self.create_publisher(RobotInformation, 'robot_info', 10)                          #publisher for projector node
+        
+        self.collision_publisher = self.create_publisher(Collision, 'global_costmap/collision_point', 10)
 
-        timer_period = 0.2  # seconds
+        timer_period = 0.5#0.2  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.id_subscriber = self.create_subscription(Identifier, 'scanned_ids', self.scanned_id_callback, 10)     #subscribes to get robot ID
@@ -68,18 +79,60 @@ class PriorityController(Node):
                     v1 = self.sub['results']['odom'].twist.twist.linear
                     v2 = self.robots[bot]['results']['odom'].twist.twist.linear
                     
-                    collision = get_collision_coords(x1, y1, v1, x2, y2, v2, 0.5)
+
+                    collision = get_collision_coords(x1, y1, v1, x2, y2, v2, 1.0)
+
+                    msg = Collision()
 
                     if collision:
-                        x, y = collision
-                        self.get_logger().info(f"Collision at ({x}, {y}) detected!")
+                        try:
+                            x, y, dist = collision
 
-                    # if not hasattr(self, 'plt'):
-                    #     self.plt = Graph(self.info.name)
-                    #     self.plt.update(x1, y1, v1, x2, y2, v2)
-                    #     self.plt.rescale()
-                    # else:
-                    #     self.plt.update(x1, y1, v1, x2, y2, v2)
+                            self.get_logger().info(f"Collision at ({x}, {y}) detected!")
+                            
+                            # now = rclpy.time.Time()
+                            # trans : Quaternion = self.tf_buffer.lookup_transform(
+                            #     'base_link',
+                            #     'map',
+                            #     now).transform.rotation
+                            # quat = trans.x, trans.y, trans.z, trans.w
+                            # mat = tf.quaternion_matrix(quat)
+
+
+                            # self.get_logger().info(f"Rotation matrix: ({mat})")
+
+                            # coord = np.array([x, y, 0, 0]).T
+                            # self.get_logger().info(f"Coord <map>: ({coord})")
+                            # coord = np.matmul(mat, coord)
+                            # self.get_logger().info(f"Coord <base_link>: ({coord})")
+                            # coord[1] += 0.4
+                            # self.get_logger().info(f"Coord <base_link>: ({coord})")
+                            # coord = np.matmul(np.linalg.inv(mat), coord)
+                            # self.get_logger().info(f"Coord <map>: ({coord})")
+                            msg.radius = dist*0.5
+                            msg.enabled = True
+                            msg.point.x = x #float(coord[0])
+                            msg.point.y = y #float(coord[1])
+                            
+                        except TransformException as ex:
+                            self.get_logger().info(
+                                f'Could not transform <map> to <base_link>: {ex}')
+                        except Exception as ex:
+                            self.get_logger().error(f"{ex}")
+                            raise(ex)
+                        
+                    else:
+                        msg.enabled = False
+
+                    self.collision_publisher.publish(msg)
+
+                    if not hasattr(self, 'plt'):
+                        self.plt = Graph(self.info.name)
+                        self.plt.update(x1, y1, v1, x2, y2, v2)
+                        # self.plt.rescale((0,0))
+                    else:
+                        self.plt.update(x1, y1, v1, x2, y2, v2)
+                        # self.plt.rescale((0,0))
 
                 # self.get_logger().info(str(bot['results']))
 
@@ -93,6 +146,7 @@ class PriorityController(Node):
             resp['results'][sub] = msg
             
         resp['subscriptions'] ={
+                    # 'tf': self.create_subscription(TransformStamped, f"{name}/tf", lambda m: add_result('tf', m), 10),
                     'plan': self.create_subscription(Path, f"{name}/plan", lambda m: add_result('plan', m), 10),
                     'odom': self.create_subscription(Odometry, f"{name}/odom", lambda m: add_result('odom', m), 10),
                     'cmd_vel': self.create_subscription(Twist, f"{name}/cmd_vel", lambda m: add_result('cmd_vel', m), 10),
