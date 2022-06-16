@@ -1,7 +1,7 @@
 from turtle import Vec2D
 from typing import List, Tuple, Union
 import numpy as np
-from math import sqrt
+from math import acos, asin, atan, pi, sqrt
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from geometry_msgs.msg import Vector3
@@ -15,7 +15,7 @@ def setup_test():
     v1 = Vector3(x=1.0)
     v2 = Vector3(x=2.0)
 
-def get_collision_coords(x1 : List[float], y1 : List[float], v1: Vector3, x2 : List[float], y2 : List[float], v2: Vector3, thres: float) ->  Union[None, Tuple[float, float, float]]:
+def get_collision_coords(x1 : List[float], y1 : List[float], v1: Vector3, x2 : List[float], y2 : List[float], v2: Vector3, thres: float) ->  Union[None, bool, Tuple[float, float, float]]:
     getdist = lambda pt1, pt2: sqrt((pt1[0]-pt2[0])**2 + (pt1[1]-pt2[1])**2)
     
     dist1 = np.insert(np.cumsum(list(map(getdist, zip(x1[:-1], y1[:-1]), zip(x1[1:], y1[1:])))), 0, 0)
@@ -35,6 +35,10 @@ def get_collision_coords(x1 : List[float], y1 : List[float], v1: Vector3, x2 : L
     disty = y1-y2
 
     dist = np.sqrt(np.square(distx)+np.square(disty))
+
+    if np.argmin(dist) == 0:
+        return True
+
     # nmin = np.argmin(dist)
     bin_dist = np.diff(dist<thres)
     n_end = np.argmax(bin_dist)
@@ -42,17 +46,23 @@ def get_collision_coords(x1 : List[float], y1 : List[float], v1: Vector3, x2 : L
     if n_end == 0:
         return
 
-    n_collision = np.argmin(dist[:n_end])
+    # n_collision = np.argmin(dist[:n_end])
 
-    # n_collision = np.argwhere(dist < thres)
+    n_collision = np.min(np.argwhere(dist < thres))
 
-    if not n_collision.size:
+    if not n_collision:
         return
 
 
-    x = x2[np.min(n_collision)]
-    y = y2[np.min(n_collision)]
+    x = 0.5* (x1[n_collision] + x2[n_collision])
+    y = 0.5* (y1[n_collision] + y2[n_collision])
 
+    angle = atan(disty[n_collision]/distx[n_collision])
+    
+    angle = angle + pi if distx[n_collision]>0 else angle
+
+
+    return x, y, angle
     return (x, y, dist[np.min(n_collision)])
 
     self.mindist.set_data([x1[nmin], x2[nmin]], [y1[nmin], y2[nmin]])

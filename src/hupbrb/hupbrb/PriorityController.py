@@ -1,4 +1,5 @@
 from cmath import inf
+from math import cos, sin, pi, sqrt
 import rclpy
 from rclpy.node import Node
 import os
@@ -61,9 +62,9 @@ class PriorityController(Node):
                     x2 = msg2.pose.pose.position.x
                     y2 = msg2.pose.pose.position.y
 
-                    dist = (x2-x1)**2 + (y2-y1)**2
+                    dist = sqrt((x2-x1)**2 + (y2-y1)**2)
 
-                    self.get_logger().debug(str(dist))
+                    # self.get_logger().info(str(dist))
 
                     if dist > inf:
                         self.get_logger().info(f"Distance = {dist} > 10.0\nUnsubscribing...")
@@ -80,15 +81,25 @@ class PriorityController(Node):
                     v2 = self.robots[bot]['results']['odom'].twist.twist.linear
                     
 
-                    collision = get_collision_coords(x1, y1, v1, x2, y2, v2, 1.0)
+                    collision = get_collision_coords(x1, y1, v1, x2, y2, v2, 0.4)
+
+                    # self.get_logger().info(f"Collision: {collision}")
 
                     msg = Collision()
 
-                    if collision:
+                    if collision == True:
+                        #Connection should be killed
+                        self.get_logger().info(f"Unsubscribing...\n")
+                        msg.enabled = False
+                        self.kill_bot(bot)
+                        self.collision_publisher.publish(msg)
+                        break
+                        
+                    elif collision:
                         try:
-                            x, y, dist = collision
+                            x, y, angle = collision
 
-                            self.get_logger().info(f"Collision at ({x}, {y}) detected!")
+                            self.get_logger().info(f"Collision at ({x}, {y}) detected!\nAngle: {angle*180/pi}")
                             
                             # now = rclpy.time.Time()
                             # trans : Quaternion = self.tf_buffer.lookup_transform(
@@ -109,10 +120,10 @@ class PriorityController(Node):
                             # self.get_logger().info(f"Coord <base_link>: ({coord})")
                             # coord = np.matmul(np.linalg.inv(mat), coord)
                             # self.get_logger().info(f"Coord <map>: ({coord})")
-                            msg.radius = dist*0.5
+                            msg.radius = 1.0
                             msg.enabled = True
-                            msg.point.x = x #float(coord[0])
-                            msg.point.y = y #float(coord[1])
+                            msg.point.x = x + 0.9*msg.radius*cos(pi/2 + angle)
+                            msg.point.y = y + 0.9*msg.radius*sin(pi/2 + angle)
                             
                         except TransformException as ex:
                             self.get_logger().info(
@@ -122,17 +133,19 @@ class PriorityController(Node):
                             raise(ex)
                         
                     else:
-                        msg.enabled = False
+                        # msg.enabled = False
+                        # no collision detected yet, possible in future..
+                        pass
 
                     self.collision_publisher.publish(msg)
 
-                    if not hasattr(self, 'plt'):
-                        self.plt = Graph(self.info.name)
-                        self.plt.update(x1, y1, v1, x2, y2, v2)
-                        # self.plt.rescale((0,0))
-                    else:
-                        self.plt.update(x1, y1, v1, x2, y2, v2)
-                        # self.plt.rescale((0,0))
+                    # if not hasattr(self, 'plt'):
+                    #     self.plt = Graph(self.info.name)
+                    #     self.plt.update(x1, y1, v1, x2, y2, v2)
+                    #     # self.plt.rescale((0,0))
+                    # else:
+                    #     self.plt.update(x1, y1, v1, x2, y2, v2)
+                    #     # self.plt.rescale((0,0))
 
                 # self.get_logger().info(str(bot['results']))
 
