@@ -1,4 +1,3 @@
-string id
-uint8 priority
+RobotInformation info
 ---
-uint8 priority
+RobotInformation info

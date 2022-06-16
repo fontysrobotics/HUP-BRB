@@ -6,7 +6,7 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import PoseStamped
 import math
 import time
-from std_msgs.msg import String
+from std_msgs.msg import String, Header
 from hupbrb_msgs.msg import Identifier
 import numpy as np 
 import cv2
@@ -24,7 +24,32 @@ class Scanner(Node):
         	self.camera_input,
             qos_profile_sensor_data,
             )
+
+        inf = self.get_publishers_info_by_topic('camera/image_raw')
+        if not inf:
+            self.get_logger().info("No publishers on camera/image_raw. Opening hardware camera.")
+            self.camera = cv2.VideoCapture()
+            self.camera.open(0, cv2.CAP_ANY)
+            if not self.camera.isOpened():
+                self.get_logger().error("Camera topic does not exist, and cannot open physical camera")
+            self.cam_publisher = self.create_publisher(Image, 'camera/image_raw', qos_profile_sensor_data)
+            self.create_timer(0.04, self.publish_frame)
+
         self.srv = self.create_publisher(Identifier, 'scanned_ids', 10)
+
+    def publish_frame(self):
+        _ , frame = self.camera.read()
+        ros_image = Image()
+        ros_image.header = Header()
+        ros_image.height, ros_image.width, elemsize = frame.shape
+        ros_image.encoding = "bgr8"
+        ros_image.is_bigendian = False
+        ros_image.step = ros_image.width * elemsize
+        size = ros_image.step * ros_image.height
+        # ros_image.data.resize(size)
+        ros_image.data = bytes(frame.flatten())
+
+        self.cam_publisher.publish(ros_image)
 
     def camera_input(self, message: Image):
         self.get_logger().debug("Received camera input")
@@ -40,7 +65,7 @@ class Scanner(Node):
                 # Publish the value of the QR code 
                 # or an empty string if no QR code is detected
                 msg = Identifier()
-                msg.id = qr_text
+                msg.name = qr_text
                 self.srv.publish(msg)
 
         except cv2.error:

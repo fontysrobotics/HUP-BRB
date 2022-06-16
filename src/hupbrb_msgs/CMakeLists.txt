@@ -32,9 +32,10 @@ if(BUILD_TESTING)
 endif()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Priority.msg"
-  "msg/Identifier.msg"
   "msg/Collision.msg"
+  "msg/Identifier.msg"
+  "msg/Priority.msg"
+  "msg/RobotInformation.msg"
   "srv/Handshake.srv"
   DEPENDENCIES geometry_msgs
 )

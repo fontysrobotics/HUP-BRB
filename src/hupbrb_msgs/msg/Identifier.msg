@@ -1,1 +1,2 @@
-string id
+string name
+uint8 id 0
