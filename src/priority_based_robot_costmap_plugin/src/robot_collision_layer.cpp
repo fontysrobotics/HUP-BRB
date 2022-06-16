@@ -26,7 +26,8 @@ namespace priority_based_robot_costmap_plugin
 {
 
 double calcCost(double distance, double radius){
-  return 255 * ( 1 + ((radius-distance) / (radius * 0.5)));
+  const double percentage = 0.5;
+  return 255 * ( 1 + (((radius * (1 - percentage))-distance) / (radius * percentage)));
 }
 
 RobotCollisionLayer::RobotCollisionLayer()
@@ -56,7 +57,9 @@ RobotCollisionLayer::onInitialize()
 
 void RobotCollisionLayer::topic_callback(const hupbrb_msgs::msg::Collision::SharedPtr msg)
 {
-  RCLCPP_INFO(node_->get_logger(), "Collision expected at: '%lf, %lf'", msg->point.x, msg->point.y);
+  if (msg->enabled) {
+    RCLCPP_INFO(node_->get_logger(), "Collision expected at: '%lf, %lf'", msg->point.x, msg->point.y);
+  }
   collision_x = msg->point.x;
   collision_y = msg->point.y;
   radius_ = msg->radius;
