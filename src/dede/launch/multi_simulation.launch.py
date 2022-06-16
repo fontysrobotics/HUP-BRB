@@ -2,16 +2,22 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, GroupAction
+from launch.actions import IncludeLaunchDescription, GroupAction, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import TextSubstitution
+from launch.substitutions import TextSubstitution, PathJoinSubstitution, LaunchConfiguration
 from launch_ros.actions import Node
 
 def generate_launch_description():
+
+    world_param = LaunchConfiguration('world')
+    world_param_arg = DeclareLaunchArgument('world', default_value='open_space.world', description="The world to simulate")
+
     # File paths
-    world_sdf = os.path.join(get_package_share_directory('dede'), 'worlds', 'open_space.world')
-    robot_sdf = os.path.join(get_package_share_directory('dede'), 'models', 'dede', 'model.sdf')
-    robot_urdf = os.path.join(get_package_share_directory('dede'), 'urdf', "dede.urdf")
+    dede_share = get_package_share_directory('dede')
+    world_sdf = PathJoinSubstitution([dede_share, 'worlds', world_param ])
+    robot_sdf = os.path.join(dede_share, 'models', 'dede', 'model.sdf')
+    robot_urdf = os.path.join(dede_share, 'urdf', "dede.urdf")
+    
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
 
     # Gazebo Client and Server
@@ -63,6 +69,8 @@ def generate_launch_description():
 
     # Launch Description Setup
     ld = LaunchDescription()
+    ld.add_action(world_param_arg)
+
     ld.add_action(gazebo_server)
     ld.add_action(gazebo_client)
     for item in robot_group:

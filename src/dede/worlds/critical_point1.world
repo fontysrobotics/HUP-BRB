@@ -66,11 +66,11 @@
         <kinematic>0</kinematic>
       </link>
     </model>
-    <include>
+    <!-- <include>
       <pose>1.0 1.0 0.01 0.0 0.0 0.0</pose>
-      <uri>model://turtlebot3_waffle_custom</uri>
-      <!--<uri>model://dede</uri>-->
-    </include>
+      <uri>model://turtlebot3_waffle_custom</uri> -->
+      <!--<uri>model://dede</uri>
+    </include> -->
     <gravity>0 0 -9.8</gravity>
     <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
     <atmosphere type='adiabatic'/>
