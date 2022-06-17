@@ -87,7 +87,10 @@ def generate_launch_description():
         namespace=namespace,
         parameters=[
             RewrittenYaml(
-                source_file=TextSubstitution(text=tb3_param_dir),
+                source_file=TextSubstitution(text=os.path.join(
+                    get_package_share_directory('hupbrb'),
+                    'config',
+                    TURTLEBOT3_MODEL + '.yaml')), #tb3_param_dir
                 root_key=TextSubstitution(text=namespace),
                 param_rewrites={},
                 convert_types=True)
