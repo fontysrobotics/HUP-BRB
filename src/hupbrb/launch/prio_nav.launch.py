@@ -102,7 +102,7 @@ def generate_launch_description():
     ld.add_action(
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([lidar_pkg_dir, LDS_LAUNCH_FILE]),
-            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': 'base_scan'}.items(),
+            launch_arguments={'namespace': namespace, 'port': '/dev/ttyUSB0', 'frame_id': 'base_scan'}.items(),
         ))
     # ld.add_action(namespace_arg)
     ld.add_action(usb_port_arg)
