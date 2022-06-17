@@ -87,7 +87,7 @@ def generate_launch_description():
         namespace=namespace,
         parameters=[
             RewrittenYaml(
-                source_file=tb3_param_dir,
+                source_file=TextSubstitution(text=tb3_param_dir),
                 root_key=TextSubstitution(text=namespace),
                 param_rewrites={},
                 convert_types=True)
