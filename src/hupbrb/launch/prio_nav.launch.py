@@ -1,17 +1,18 @@
 import os
-from platform import node
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.substitutions import LaunchConfiguration, TextSubstitution, LocalSubstitution
+from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
 def generate_launch_description():
     # Paramater Setup
-    namespace = LaunchConfiguration('namespace')
-    namespace_arg = DeclareLaunchArgument('namespace',
-        description='The name of the launching robot.')
+    namespace = os.uname().nodename
+    # LaunchConfiguration('namespace')
+    # namespace_arg = DeclareLaunchArgument('namespace',
+    #     description='The name of the launching robot.')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     use_sim_time_arg = DeclareLaunchArgument(
@@ -89,10 +90,21 @@ def generate_launch_description():
         parameters=[{'use_sim_time': use_sim_time}],
         arguments=[urdf])
 
+    lidar_pkg_dir = LaunchConfiguration(
+            'lidar_pkg_dir',
+            default=os.path.join(get_package_share_directory('ld08_driver'), 'launch'))
+    LDS_LAUNCH_FILE = '/ld08.launch.py'
+
+
     # Launch Description Setup
     ld = LaunchDescription()
     
-    ld.add_action(namespace_arg)
+    ld.add_action(
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([lidar_pkg_dir, LDS_LAUNCH_FILE]),
+            launch_arguments={'port': '/dev/ttyUSB0', 'frame_id': 'base_scan'}.items(),
+        ))
+    # ld.add_action(namespace_arg)
     ld.add_action(usb_port_arg)
     ld.add_action(tb3_param_dir_arg)
     ld.add_action(use_sim_time_arg)

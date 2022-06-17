@@ -1,17 +1,16 @@
-from cmath import inf
 from math import cos, sin, pi, sqrt
 import rclpy
 from rclpy.node import Node
 import os
-import numpy as np
+# import numpy as np
 
-from .collision import Graph, get_collision_coords
+from .collision import get_collision_coords
 
-from tf2_ros import TransformException
-from tf2_ros.transform_listener import TransformListener
-from tf2_ros.buffer import Buffer
+# from tf2_ros import TransformException
+# from tf2_ros.transform_listener import TransformListener
+# from tf2_ros.buffer import Buffer
 
-import tf_transformations as tf
+# import tf_transformations as tf
 
 from std_msgs.msg import String
 from geometry_msgs.msg import Twist, TransformStamped, Quaternion
@@ -31,8 +30,8 @@ class PriorityController(Node):
         self.robots = dict()
 
         self.sub = self.subscribe_to_bot(self.info.name)
-        self.tf_buffer = Buffer()
-        self.tf_listener = TransformListener(self.tf_buffer, self)
+        # self.tf_buffer = Buffer()
+        # self.tf_listener = TransformListener(self.tf_buffer, self)
 
         self.id_publisher = self.create_publisher(RobotInformation, 'robot_info', 10)                          #publisher for projector node
         
@@ -66,7 +65,7 @@ class PriorityController(Node):
 
                     # self.get_logger().info(str(dist))
 
-                    if dist > inf:
+                    if False:#dist > inf:
                         self.get_logger().info(f"Distance = {dist} > 10.0\nUnsubscribing...")
                         self.kill_bot(bot)
                         break
@@ -159,7 +158,6 @@ class PriorityController(Node):
             resp['results'][sub] = msg
             
         resp['subscriptions'] ={
-                    # 'tf': self.create_subscription(TransformStamped, f"{name}/tf", lambda m: add_result('tf', m), 10),
                     'plan': self.create_subscription(Path, f"{name}/plan", lambda m: add_result('plan', m), 10),
                     'odom': self.create_subscription(Odometry, f"{name}/odom", lambda m: add_result('odom', m), 10),
                     'cmd_vel': self.create_subscription(Twist, f"{name}/cmd_vel", lambda m: add_result('cmd_vel', m), 10),
