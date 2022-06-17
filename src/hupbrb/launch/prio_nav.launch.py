@@ -75,6 +75,12 @@ def generate_launch_description():
     )
 
     #turtlebot 3
+    param_remap_costmap ={
+        "map_topic": "/" + namespace + "/map",
+        "topic" : "/" + namespace + "/scan",
+        "use_sim_time": use_sim_time
+    }
+
     turtlebot3 = Node(
         package='turtlebot3_node',
         executable='turtlebot3_ros',
@@ -83,7 +89,7 @@ def generate_launch_description():
             RewrittenYaml(
                 source_file=tb3_param_dir,
                 root_key=TextSubstitution(text=namespace),
-                # param_rewrites=param_remap_costmap,
+                param_rewrites={},
                 convert_types=True)
         ],
         arguments=['-i', usb_port, '--ros-args', '--log-level', 'DEBUG'],
