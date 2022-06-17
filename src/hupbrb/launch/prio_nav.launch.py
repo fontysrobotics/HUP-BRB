@@ -7,6 +7,8 @@ from launch.substitutions import LaunchConfiguration, TextSubstitution, LocalSub
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
+from nav2_common.launch import RewrittenYaml
+
 def generate_launch_description():
     # Paramater Setup
     namespace = os.uname().nodename
@@ -20,7 +22,7 @@ def generate_launch_description():
         default_value=use_sim_time,
         description='Use simulation (Gazebo) clock if true')
 
-    # Turtlebot stuff
+    # Turtlebot stufffrom nav2_common.launch import RewrittenYaml
 
     TURTLEBOT3_MODEL = os.environ['TURTLEBOT3_MODEL']
 
@@ -33,8 +35,8 @@ def generate_launch_description():
     tb3_param_dir = LaunchConfiguration(
         'tb3_param_dir',
         default=os.path.join(
-            get_package_share_directory('turtlebot3_bringup'),
-            'param',
+            get_package_share_directory('hupbrb'),
+            'config',
             TURTLEBOT3_MODEL + '.yaml'))
     tb3_param_dir_arg = DeclareLaunchArgument(
             'tb3_param_dir',
@@ -77,7 +79,13 @@ def generate_launch_description():
         package='turtlebot3_node',
         executable='turtlebot3_ros',
         namespace=namespace,
-        parameters=[tb3_param_dir],
+        parameters=[
+            RewrittenYaml(
+                source_file=tb3_param_dir,
+                root_key=TextSubstitution(text=namespace),
+                # param_rewrites=param_remap_costmap,
+                convert_types=True)
+        ],
         arguments=['-i', usb_port, '--ros-args', '--log-level', 'DEBUG'],
         output='screen')
 
@@ -94,14 +102,14 @@ def generate_launch_description():
     # Launch Description Setup
     ld = LaunchDescription()
     
-    ld.add_action(Node(
-        package='ld08_driver',
-        executable='ld08_driver',
-        namespace=namespace,
-        name='ld08_driver',
-        arguments={'port': '/dev/ttyUSB0', 'frame_id': 'base_scan'}.items(),
-        # remappings=[("/scan", f"/{namespace}/scan")]
-        output='screen'))
+    # ld.add_action(Node(
+    #     package='ld08_driver',
+    #     executable='ld08_driver',
+    #     namespace=namespace,
+    #     name='ld08_driver',
+    #     arguments={'port': '/dev/ttyUSB0', 'frame_id': 'base_scan'}.items(),
+    #     # remappings=[("/scan", f"/{namespace}/scan")]
+    #     output='screen'))
     # ld.add_action(namespace_arg)
     ld.add_action(usb_port_arg)
     ld.add_action(tb3_param_dir_arg)
