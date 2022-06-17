@@ -21,7 +21,7 @@ class PriorityController(Node):
 
         self.sub = self.subscribe_to_bot(self.info.name)
 
-        self.id_publisher = self.create_publisher(RobotInformation, 'robot_info', 10)                          #publisher for projector node
+        self.id_publisher = self.create_publisher(RobotInformation, '/robot_info', 10)                          #publisher for projector node
 
         timer_period = 1.0  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
@@ -31,6 +31,7 @@ class PriorityController(Node):
 
     def timer_callback(self):
         self.id_publisher.publish(self.info)
+        print(self.info)
         
         for bot in self.robots:
             if not "subscriptions" in self.robots[bot]:             

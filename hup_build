@@ -1,5 +1,5 @@
 #!/bin/sh
 # Builds and sources everything
 
-cd ~/hupbrb_ws
+cd ~/new_ws
 colcon build
