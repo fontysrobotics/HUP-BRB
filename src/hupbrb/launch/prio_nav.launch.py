@@ -90,20 +90,18 @@ def generate_launch_description():
         parameters=[{'use_sim_time': use_sim_time}],
         arguments=[urdf])
 
-    lidar_pkg_dir = LaunchConfiguration(
-            'lidar_pkg_dir',
-            default=os.path.join(get_package_share_directory('ld08_driver'), 'launch'))
-    LDS_LAUNCH_FILE = '/ld08.launch.py'
-
 
     # Launch Description Setup
     ld = LaunchDescription()
     
-    ld.add_action(
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([lidar_pkg_dir, LDS_LAUNCH_FILE]),
-            launch_arguments={'namespace': namespace, 'port': '/dev/ttyUSB0', 'frame_id': 'base_scan'}.items(),
-        ))
+    ld.add_action(Node(
+        package='ld08_driver',
+        executable='ld08_driver',
+        namespace=namespace,
+        name='ld08_driver',
+        arguments={'port': '/dev/ttyUSB0', 'frame_id': 'base_scan'}.items(),
+        # remappings=[("/scan", f"/{namespace}/scan")]
+        output='screen'))
     # ld.add_action(namespace_arg)
     ld.add_action(usb_port_arg)
     ld.add_action(tb3_param_dir_arg)
