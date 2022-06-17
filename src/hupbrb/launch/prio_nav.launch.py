@@ -95,7 +95,7 @@ def generate_launch_description():
                 param_rewrites={},
                 convert_types=True)
         ],
-        arguments=['-i', usb_port, '--ros-args', '--log-level', 'DEBUG'],
+        arguments=['-i', usb_port, '--ros-args'],
         output='screen')
 
     turtle_state_publisher =  Node(
