@@ -97,6 +97,9 @@ def generate_launch_description():
         executable='robot_state_publisher',
         namespace=namespace,
         name='robot_state_publisher',
+        remappings= [
+            ('/tf', 'tf'),
+            ('/tf_static', 'tf_static')],
         output='screen',
         parameters=[{'use_sim_time': use_sim_time}],
         arguments=[urdf])
