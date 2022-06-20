@@ -38,10 +38,15 @@ class PathProjection(Node):
 
     def save_plan(self, robot: RobotInformation, msg: Path):
         self.robots[robot.name]["path"] = msg.poses
+        for x, y in self.robots.items():
+            print(x,y)
 
     def draw_lines(self):
-        window_x = 1280
-        window_y = 1024
+        #window_x = 1280
+        #window_y = 1024
+
+        window_x = 1920
+        window_y = 1080
 
         NUM_VERT = 4
         frame = np.full((window_y, window_x, 3),0).astype(np.uint8)
@@ -61,43 +66,43 @@ class PathProjection(Node):
         
         
 
-        for robot in self.robots:
+        for x in self.robots:
             points = []
             empty = []
             empty_array = np.array(empty)
+            if 'path' in x:
+                for poseStamped in self.robots[x]["path"]:
+                    coordinates = scale_coordinates(poseStamped.pose.position.x, poseStamped.pose.position.y)
+                    points.append(coordinates)
 
-            for poseStamped in self.robots[robot]["path"]:
-                coordinates = scale_coordinates(poseStamped.pose.position.x, poseStamped.pose.position.y)
-                points.append(coordinates)
+                points = np.array(points)
 
-            points = np.array(points)
+                if len(points) >= 5:
+                    mask = np.int32(np.floor(np.arange(0, NUM_VERT+1, 1)*((len(points)-1)/NUM_VERT)))
 
-            if len(points) >= 5:
-                mask = np.int32(np.floor(np.arange(0, NUM_VERT+1, 1)*((len(points)-1)/NUM_VERT)))
+                    tck, _ = interpolate.splprep(points[mask].T, s=0)
+                    unew = np.arange(0, 1, 0.01)
+                    out = np.array(interpolate.splev(unew, tck), dtype=np.int32).T
+                else:
+                    out = empty_array
 
-                tck, _ = interpolate.splprep(points[mask].T, s=0)
-                unew = np.arange(0, 1, 0.01)
-                out = np.array(interpolate.splev(unew, tck), dtype=np.int32).T
-            else:
-                out = empty_array
+                last_x, last_y = points[-1]
+                circle_radius = int((robot_radius/map_y)*window_y)
+                center_x = int(last_x)
+                center_y = int(last_y)
+                cv2.circle(frame, (center_x, center_y), circle_radius, (0, 0, 255), 2)
 
-            last_x, last_y = points[-1]
-            circle_radius = int((robot_radius/map_y)*window_y)
-            center_x = int(last_x)
-            center_y = int(last_y)
-            cv2.circle(frame, (center_x, center_y), circle_radius, (0, 0, 255), 2)
+                cv2.polylines(frame, [out], isClosed = False, color = (255, 0, 0), thickness = 2)
+                cv2.polylines(frame, [points], isClosed = False, color = (0, 0, 255), thickness = 1)
 
-            cv2.polylines(frame, [out], isClosed = False, color = (255, 0, 0), thickness = 2)
-            cv2.polylines(frame, [points], isClosed = False, color = (0, 0, 255), thickness = 1)
-
-            if self.RobotLocation:
-                pos_x, pos_y = self.RobotLocation
-                cv2.circle(frame, (pos_x, pos_y), circle_radius, (0, 255, 0), 3)
-                robot_orientation_array = self.RobotOrientation.as_euler('zxy', degrees=False)
-                robot_orientation_z = robot_orientation_array[0]+1.57
-                add_x = int(np.sin(robot_orientation_z)*circle_radius)
-                add_y = int(np.cos(robot_orientation_z)*circle_radius)
-                cv2.line(frame, (pos_x, pos_y), (pos_x+add_x,pos_y+add_y), (0, 150, 0), 2) 
+                if self.RobotLocation:
+                    pos_x, pos_y = self.RobotLocation
+                    cv2.circle(frame, (pos_x, pos_y), circle_radius, (0, 255, 0), 3)
+                    robot_orientation_array = self.RobotOrientation.as_euler('zxy', degrees=False)
+                    robot_orientation_z = robot_orientation_array[0]+1.57
+                    add_x = int(np.sin(robot_orientation_z)*circle_radius)
+                    add_y = int(np.cos(robot_orientation_z)*circle_radius)
+                    cv2.line(frame, (pos_x, pos_y), (pos_x+add_x,pos_y+add_y), (0, 150, 0), 2) 
 
         cv2.namedWindow('map', cv2.WND_PROP_FULLSCREEN)
         cv2.setWindowProperty('map', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
