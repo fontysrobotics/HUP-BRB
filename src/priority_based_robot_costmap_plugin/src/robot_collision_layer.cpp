@@ -76,11 +76,7 @@ RobotCollisionLayer::updateBounds(
   robot_y_ = robot_y;
   robot_yaw_ = robot_yaw;
 
-  *min_x = -10.;
-  *min_y = -10.;
-  *max_x = 10.;
-  *max_y = 10.;
-
+  layered_costmap_->getUpdatedBounds(*min_x, *min_y, *max_x, *max_y);
 }
 
 // The method is called when footprint was changed.

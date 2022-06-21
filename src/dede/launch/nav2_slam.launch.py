@@ -1,4 +1,5 @@
 import os
+from tkinter.font import names
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
@@ -27,12 +28,27 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace')
     namespace_arg = DeclareLaunchArgument('namespace', default_value="", description='Namespace for navigation')
 
-    def YamlWithNamespace (source) :
+    def YamlWithNamespace (source, **kwargs) :
         return RewrittenYaml(
             source_file=TextSubstitution(text=(nav2_configs + source)),
             root_key=namespace,
-            param_rewrites=[],
+            param_rewrites={
+                "map_topic": ["/", namespace,  "/map"],
+                "scan_topic" : ["/", namespace, "/scan"],
+                **kwargs,
+            },
             convert_types=True)
+
+    remap_tf = [
+            ('/tf', 'tf'),
+            ('/tf_static', 'tf_static')]
+
+    remap_scan_and_map = [
+            ('/map', ['/', namespace, '/map']), 
+            ('/map_metadata', ['/', namespace, '/map_metadata']), 
+            ('/initialpose', ['/', namespace, '/initialpose']), 
+            ('/scan', ['/', namespace, '/scan'])] 
+
 
     # Nodes
     slam_node = Node(
@@ -43,18 +59,26 @@ def generate_launch_description():
             {'map_start_pose': map_slam_pose}
         ],
         package='slam_toolbox',
-        namespace=namespace,
         executable='localization_slam_toolbox_node',
         name='slam_toolbox',
+        namespace=namespace,
+        remappings= [ *remap_tf, *remap_scan_and_map ],
         output='screen')
     nav_group = GroupAction([
         Node(
             package='nav2_controller',
             executable='controller_server',
             namespace=namespace,
+            remappings= [ 
+                *remap_tf,
+                ('/slam_toolbox', 'slam_toolbox'), 
+                ('/Initialpose', 'Initialpose'), 
+                ],
             output='screen',
             parameters=[
-                YamlWithNamespace("/controller_dwb.yaml"),
+                YamlWithNamespace(
+                    "/controller_dwb.yaml",
+                    topic = ["/", namespace, "/scan"]),
                 {"use_sim_time": use_sim_time}]),
         
         Node(
@@ -62,9 +86,12 @@ def generate_launch_description():
             executable='planner_server',
             name='planner_server',
             namespace=namespace,
+            remappings= [ *remap_tf, *remap_scan_and_map ],
             output='screen',
             parameters=[
-                YamlWithNamespace("/planner.yaml"),
+                YamlWithNamespace(
+                    "/planner.yaml",
+                    topic = ["/", namespace, "/scan"]),
                 {"use_sim_time": use_sim_time}]),
 
         Node(
@@ -82,6 +109,7 @@ def generate_launch_description():
             executable='bt_navigator',
             name='bt_navigator',
             namespace=namespace,
+            remappings= [ *remap_tf ],
             output='screen',
             parameters=[
                 YamlWithNamespace("/bt_navigator.yaml"),

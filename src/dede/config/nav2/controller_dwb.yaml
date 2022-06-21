@@ -69,7 +69,7 @@ local_costmap:
       robot_radius: 0.18
       transform_tolerance: 0.5
       global_frame: odom
-      map_topic: /map
+      map_topic: map
       robot_base_frame: base_link
       rolling_window: true
       width: 20
@@ -85,7 +85,7 @@ local_costmap:
         enabled: True
         observation_sources: scan_top
         scan_top:
-          topic: /scan
+          topic: scan
           max_obstacle_height: 1.0
           clearing: True
           marking: True
