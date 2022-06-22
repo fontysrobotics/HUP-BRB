@@ -28,10 +28,8 @@ class Scanner(Node):
         self.srv = self.create_publisher(Identifier, 'scanned_ids', 10)
 
     def camera_input(self, message: Image):
-        self.get_logger().info(f"Received camera input with encoding {message.encoding}")
-
         # Transforming flat array into shape (height, width, RGB)``
-        data = np.array(message.data).reshape(message.height, message.width, 1)
+        data = np.array(message.data).reshape(message.height, message.width, 3)
         
         # Try to detect a QR code
         try:
