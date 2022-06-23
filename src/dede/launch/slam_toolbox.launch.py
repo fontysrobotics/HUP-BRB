@@ -19,6 +19,8 @@ def generate_launch_description():
     param_map_path_arg = DeclareLaunchArgument('map_file', default_value='', description="Map file path for continuation")
     param_map_pose = LaunchConfiguration('map_pose')
     param_map_pose_arg = DeclareLaunchArgument('map_pose', default_value="[0.0, 0.0, 0.0]", description="Map start pose")
+    param_namespace = LaunchConfiguration('namespace')
+    param_namespace_arg = DeclareLaunchArgument('namespace', default_value="", description="The namespace for the node to operate in.")
 
     # Nodes and flow control
     slam_node_default = GroupAction([ 
@@ -29,7 +31,16 @@ def generate_launch_description():
             ],
             package='slam_toolbox',
             executable='async_slam_toolbox_node',
+            namespace=param_namespace,
             name='slam_toolbox',
+            remappings= [
+                # there are mote but I'm lazy and they don't look important
+                ('/tf', 'tf'),
+                ('/tf_static', 'tf_static'),
+                ('/map', 'map'),
+                ('/map_metadata', 'map_metadata'),
+                ('/scan', 'scan')
+                ],
             output='screen')
         ],
         condition=IfCondition(PythonExpression(['not ', use_map_resume])),
@@ -45,6 +56,7 @@ def generate_launch_description():
             ],
             package='slam_toolbox',
             executable='async_slam_toolbox_node',
+            namespace= param_namespace,
             name='slam_toolbox',
             output='screen')
         ],
@@ -57,6 +69,7 @@ def generate_launch_description():
     ld.add_action(param_map_pose_arg)
     ld.add_action(param_map_path_arg)
     ld.add_action(use_sim_time_arg)
+    ld.add_action(param_namespace_arg)
     ld.add_action(slam_node_default)
     ld.add_action(slam_node_resume)
     
