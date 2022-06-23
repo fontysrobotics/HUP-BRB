@@ -42,10 +42,10 @@
     </include>
 
     <!-- Adds the robot inside the room, the pose is set to an empty spot in the room -->
-    <include>
+    <!-- <include>
       <pose>4.0 3.0 0.3 0.0 0.0 0.0</pose>
       <uri>model://dede</uri>
-    </include>
+    </include> -->
 
   </world>
 </sdf>
