@@ -1,10 +1,12 @@
 import os
+from tkinter.font import names
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, GroupAction
 from launch_ros.actions import Node
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, TextSubstitution
+from nav2_common.launch import RewrittenYaml
 
 def generate_launch_description():
     # Configuration Paths
@@ -23,6 +25,31 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     use_sim_time_arg = DeclareLaunchArgument('use_sim_time', default_value='True', description="Use Simulation clock?")
 
+    namespace = LaunchConfiguration('namespace')
+    namespace_arg = DeclareLaunchArgument('namespace', default_value="", description='Namespace for navigation')
+
+    def YamlWithNamespace (source, **kwargs) :
+        return RewrittenYaml(
+            source_file=TextSubstitution(text=(nav2_configs + source)),
+            root_key=namespace,
+            param_rewrites={
+                "map_topic": ["/", namespace,  "/map"],
+                "scan_topic" : ["/", namespace, "/scan"],
+                **kwargs,
+            },
+            convert_types=True)
+
+    remap_tf = [
+            ('/tf', 'tf'),
+            ('/tf_static', 'tf_static')]
+
+    remap_scan_and_map = [
+            ('/map', ['/', namespace, '/map']), 
+            ('/map_metadata', ['/', namespace, '/map_metadata']), 
+            ('/initialpose', ['/', namespace, '/initialpose']), 
+            ('/scan', ['/', namespace, '/scan'])] 
+
+
     # Nodes
     slam_node = Node(
         parameters=[
@@ -34,41 +61,59 @@ def generate_launch_description():
         package='slam_toolbox',
         executable='localization_slam_toolbox_node',
         name='slam_toolbox',
+        namespace=namespace,
+        remappings= [ *remap_tf, *remap_scan_and_map ],
         output='screen')
     nav_group = GroupAction([
         Node(
             package='nav2_controller',
             executable='controller_server',
+            namespace=namespace,
+            remappings= [ 
+                *remap_tf,
+                ('/slam_toolbox', 'slam_toolbox'), 
+                ('/Initialpose', 'Initialpose'), 
+                ],
             output='screen',
             parameters=[
-                nav2_configs + "/controller_dwb.yaml",
+                YamlWithNamespace(
+                    "/controller_dwb.yaml",
+                    topic = ["/", namespace, "/scan"]),
                 {"use_sim_time": use_sim_time}]),
         
         Node(
             package='nav2_planner',
             executable='planner_server',
             name='planner_server',
+            namespace=namespace,
+            remappings= [ *remap_tf, *remap_scan_and_map ],
             output='screen',
             parameters=[
-                nav2_configs + "/planner.yaml",
+                YamlWithNamespace(
+                    "/planner.yaml",
+                    topic = ["/", namespace, "/scan"]),
                 {"use_sim_time": use_sim_time}]),
 
         Node(
             package='nav2_recoveries',
             executable='recoveries_server',
             name='recoveries_server',
+            namespace=namespace,
+            remappings= [ *remap_tf, *remap_scan_and_map ],
             output='screen',
             parameters=[
-                nav2_configs + "/recoveries.yaml",
+                YamlWithNamespace("/recoveries.yaml"),
                 {"use_sim_time": use_sim_time}]),
 
         Node(
             package='nav2_bt_navigator',
             executable='bt_navigator',
             name='bt_navigator',
+            namespace=namespace,
+            remappings= [ *remap_tf ],
             output='screen',
             parameters=[
-                nav2_configs + "/bt_navigator.yaml",
+                YamlWithNamespace("/bt_navigator.yaml"),
                 {"use_sim_time": use_sim_time},
                 {"default_bt_xml_filename" : nav2_bt_trees + "/navigate_w_replanning_and_recovery.xml"}
             ]),
@@ -77,15 +122,18 @@ def generate_launch_description():
             package='nav2_waypoint_follower',
             executable='waypoint_follower',
             name='waypoint_follower',
+            namespace=namespace,
+            remappings= [ *remap_tf ],
             output='screen',
             parameters=[
-                nav2_configs + "/waypoint.yaml",
+                YamlWithNamespace("/waypoint.yaml"),
                 {"use_sim_time": use_sim_time}])  
     ])
     lifecycle_manager = Node(
         package='nav2_lifecycle_manager',
         executable='lifecycle_manager',
         name='lifecycle_manager_navigation',
+        namespace=namespace,
         output='screen',
         parameters=[
             {'use_sim_time': use_sim_time},
@@ -97,6 +145,8 @@ def generate_launch_description():
     ld.add_action(map_slam_file_arg)
     ld.add_action(map_slam_pose_arg)
     ld.add_action(use_sim_time_arg)
+    ld.add_action(namespace_arg)
+
     ld.add_action(slam_node)
     ld.add_action(nav_group)
     ld.add_action(lifecycle_manager)

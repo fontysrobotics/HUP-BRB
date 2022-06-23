@@ -13,7 +13,7 @@ slam_toolbox:
     map_frame: map
     map_name: map
     base_frame: base_link
-    scan_topic: scan
+    scan_topic: /scan
     mode: localization
 
     debug_logging: false
