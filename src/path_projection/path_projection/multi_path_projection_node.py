@@ -21,6 +21,7 @@ class PathProjection(Node):
         super().__init__('path_projection')
 
         self.robotinformation_subscription = self.create_subscription(RobotInformation, '/robot_info', self.robot_info_callback, 10)
+        self.alive_checker_timer = self.create_timer(5, self.alive_check)
         
         self.RobotLocation = None
         self.RobotOrientation = None
@@ -32,6 +33,9 @@ class PathProjection(Node):
         "blue": (255, 0, 0),
         "purple": (255, 0, 255)}
 
+    def alive_check(self):
+        
+        pass
 
 
     def robot_info_callback(self, msg: RobotInformation):
@@ -39,14 +43,15 @@ class PathProjection(Node):
         robot.name = msg.name
         robot.priority = msg.priority
         robot.radius = msg.radius
-        
-        self.draw_lines()
  
         if not robot.name in self.robots:
             path_subscription = self.create_subscription(Path, robot.name+'/plan', lambda msg: self.save_plan(robot, msg), 10)
             location_subscription = self.create_subscription(Odometry, robot.name+'/odom', self.location_callback, 10)
             index = len(self.robots) 
-            self.robots[robot.name] = {"info": robot, "path_subscription": path_subscription, "location_subscription": location_subscription, "color": list(self.color.values())[index]}   
+            self.robots[robot.name] = {"info": robot, "path_subscription": path_subscription, "location_subscription": location_subscription, "color": list(self.color.values())[index]} 
+
+        
+        self.draw_lines()  
     
 
     def save_plan(self, robot: RobotInformation, msg: Path):
