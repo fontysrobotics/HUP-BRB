@@ -14,10 +14,10 @@ def generate_launch_description():
 
     # File paths
     dede_share = get_package_share_directory('dede')
-    world_sdf = PathJoinSubstitution([dede_share, 'worlds', world_param ])
+    world_sdf = os.path.join(dede_share, 'worlds', 'open_space.world')
     robot_sdf = os.path.join(dede_share, 'models', 'dede', 'model.sdf')
     robot_urdf = os.path.join(dede_share, 'urdf', "dede.urdf")
-    
+
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
 
     # Gazebo Client and Server

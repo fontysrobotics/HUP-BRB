@@ -33,8 +33,7 @@ class PriorityController(Node):
         # self.tf_buffer = Buffer()
         # self.tf_listener = TransformListener(self.tf_buffer, self)
 
-        self.id_publisher = self.create_publisher(RobotInformation, 'robot_info', 10)                          #publisher for projector node
-        
+        self.id_publisher = self.create_publisher(RobotInformation, '/robot_info', 10)                          #publisher for projector node
         self.collision_publisher = self.create_publisher(Collision, 'global_costmap/collision_point', 10)
 
         timer_period = 0.5#0.2  # seconds
@@ -45,6 +44,7 @@ class PriorityController(Node):
 
     def timer_callback(self):
         self.id_publisher.publish(self.info)
+        print(self.info)
         
         for bot in self.robots:
             if not "subscriptions" in self.robots[bot]:             
