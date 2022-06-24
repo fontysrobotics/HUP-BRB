@@ -115,8 +115,8 @@ class PathProjection(Node):
                     add_y = int(np.cos(robot_orientation_z)*circle_radius)
                     cv2.line(frame, (pos_x, pos_y), (pos_x+add_x,pos_y+add_y), (0, 150, 0), 2) """
 
-        #cv2.namedWindow('map', cv2.WND_PROP_FULLSCREEN)
-        #cv2.setWindowProperty('map', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        cv2.namedWindow('map', cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty('map', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         
         cv2.imshow("plan map", frame)
         cv2.waitKey(1)
