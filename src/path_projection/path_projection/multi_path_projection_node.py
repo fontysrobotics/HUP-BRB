@@ -12,6 +12,10 @@ from enum import Enum
 from nav_msgs.msg import Path, OccupancyGrid, Odometry
 from hupbrb_msgs.msg import RobotInformation
 
+window_x = 1024
+window_y = 768
+map_x, map_y = 3.0, 2.25                     #meters
+
 class PathProjection(Node):
 
     def __init__(self):
@@ -23,11 +27,12 @@ class PathProjection(Node):
         self.RobotLocation = None
         self.RobotOrientation = None
         self.robots = {}
-        self.color = {"red": (0, 0, 255),
+        self.color = {
+        # "red": (0, 0, 255),
         "yellow": (0, 255, 255),
-        "green": (0, 255, 0),
+        # "green": (0, 255, 0),
         "lightBlue": (255, 255, 0),
-        "blue": (255, 0, 0),
+        # "blue": (255, 0, 0),
         "purple": (255, 0, 255)}
 
     def alive_check(self):
@@ -56,9 +61,6 @@ class PathProjection(Node):
         print(robot.name)
 
     def draw_lines(self):
-        window_x = 1280
-        window_y = 1024
-
         NUM_VERT = 4
         frame = np.full((window_y, window_x, 3),0).astype(np.uint8)
 
@@ -67,15 +69,11 @@ class PathProjection(Node):
         robot_radius = robot_diameter/2         #meters
 
         #enviroment specifications:
-        map_x, map_y = 3, 3                     #meters
-        
         # cv2.rectangle(frame, (138, 10), (886, 758), (255, 255, 255), 10)
         offset = 0
         pt1 = (offset, 0)
         pt2 = ((pt1[0]+window_x), window_y)
         cv2.rectangle(frame, pt1, pt2, (255, 0, 0), 3)
-        
-        
 
         for x in self.robots:
             points = []
@@ -126,8 +124,8 @@ class PathProjection(Node):
         self.RobotOrientation = Rotation.from_quat([quat.x, quat.y, quat.z, quat.w])
         
 def scale_coordinates(x, y):
-    x = int(((x/3)*1024))
-    y = int(((3-y)/3)*1024)
+    x = int((x * window_x / map_x))
+    y = int((map_y-y) * window_y / map_y)
     return x,y
 
 def main(args=None):
