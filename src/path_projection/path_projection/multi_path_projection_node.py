@@ -7,7 +7,6 @@ import numpy as np
 import cv2
 from scipy import interpolate
 from scipy.spatial.transform import Rotation
-from enum import Enum
 
 from nav_msgs.msg import Path, OccupancyGrid, Odometry
 from hupbrb_msgs.msg import RobotInformation
@@ -29,11 +28,11 @@ class PathProjection(Node):
         self.robots = {}
         self.color = {
         # "red": (0, 0, 255),
-        "yellow": (0, 255, 255),
+        "yellow": (128, 255, 255),
         # "green": (0, 255, 0),
-        "lightBlue": (255, 255, 0),
+        "lightBlue": (255, 255, 128),
         # "blue": (255, 0, 0),
-        "purple": (255, 0, 255)}
+        "purple": (255, 128, 255)}
 
     def alive_check(self):
         
@@ -101,7 +100,7 @@ class PathProjection(Node):
                 center_x = int(last_x)
                 center_y = int(last_y)
                 cv2.circle(frame, (center_x, center_y), circle_radius, self.robots[x]["color"], 2)
-                cv2.polylines(frame, [out], isClosed = False, color = self.robots[x]["color"], thickness = 3)
+                cv2.polylines(frame, [out], isClosed = False, color = self.robots[x]["color"], thickness = 100
                 #cv2.polylines(frame, [points], isClosed = False, color = (0, 0, 255), thickness = 1)
 
                 """if self.RobotLocation:
