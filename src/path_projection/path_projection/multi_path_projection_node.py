@@ -70,9 +70,9 @@ class PathProjection(Node):
         map_x, map_y = 3, 3                     #meters
         
         # cv2.rectangle(frame, (138, 10), (886, 758), (255, 255, 255), 10)
-        offset = int((window_x-window_y)/2)
+        offset = 0
         pt1 = (offset, 0)
-        pt2 = ((pt1[0]+window_y), window_y)
+        pt2 = ((pt1[0]+window_x), window_y)
         cv2.rectangle(frame, pt1, pt2, (255, 0, 0), 3)
         
         
@@ -117,8 +117,7 @@ class PathProjection(Node):
 
         cv2.namedWindow('map', cv2.WND_PROP_FULLSCREEN)
         cv2.setWindowProperty('map', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
-        
-        cv2.imshow("plan map", frame)
+        cv2.imshow("map", frame)
         cv2.waitKey(1)
 
     def location_callback(self, msg: Odometry):
@@ -127,10 +126,7 @@ class PathProjection(Node):
         self.RobotOrientation = Rotation.from_quat([quat.x, quat.y, quat.z, quat.w])
         
 def scale_coordinates(x, y):
-    window_x = 1280
-    window_y = 1024
-    offset = int((window_x-window_y)/2)
-    x = int(((x/3)*1024)+offset)
+    x = int(((x/3)*1024))
     y = int(((3-y)/3)*1024)
     return x,y
 
