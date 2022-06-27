@@ -95,13 +95,24 @@ class PathProjection(Node):
                 else:
                     out = empty_array
 
-                last_x, last_y = points[-1]
+                dest_x, dest_y = points[-1].astype(int)
+                start_x, start_y = points[0].astype(int)
+
                 circle_radius = int((robot_radius/map_y)*window_y)
-                center_x = int(last_x)
-                center_y = int(last_y)
-                cv2.circle(frame, (center_x, center_y), circle_radius, self.robots[x]["color"], 2)
-                cv2.polylines(frame, [out], isClosed = False, color = self.robots[x]["color"], thickness = 100
+
+                THICKNESS = 5
+                CROSS_SIDE = 25
+                color= self.robots[x]["color"]
+
+                cv2.polylines(frame, [out], isClosed = False, color = color, thickness = THICKNESS)
                 #cv2.polylines(frame, [points], isClosed = False, color = (0, 0, 255), thickness = 1)
+
+                cv2.line(frame, (dest_x - CROSS_SIDE, dest_y - CROSS_SIDE), (dest_x + CROSS_SIDE, dest_y + CROSS_SIDE), color=(255,)*3, thickness=THICKNESS)
+                cv2.line(frame, (dest_x - CROSS_SIDE, dest_y + CROSS_SIDE), (dest_x + CROSS_SIDE, dest_y - CROSS_SIDE), color=(255,)*3, thickness=THICKNESS)
+                
+                cv2.circle(frame, (start_x, start_y), circle_radius, self.robots[x]["color"], THICKNESS)
+
+               
 
                 """if self.RobotLocation:
                     pos_x, pos_y = self.RobotLocation
