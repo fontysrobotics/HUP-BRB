@@ -5,6 +5,7 @@ import rclpy
 from rclpy.node import Node
 import numpy as np
 import cv2
+import copy
 from scipy import interpolate
 from scipy.spatial.transform import Rotation
 
@@ -21,8 +22,10 @@ class PathProjection(Node):
         super().__init__('path_projection')
 
         self.robotinformation_subscription = self.create_subscription(RobotInformation, '/robot_info', self.robot_info_callback, 10)
-        self.alive_checker_timer = self.create_timer(5, self.alive_check)
-        
+        self.drawer_timer = self.create_timer(2, self.draw_lines)
+
+        self.alive_check_timer = self.create_timer(4, self.alive_check)
+
         self.RobotLocation = None
         self.RobotOrientation = None
         self.robots = {}
@@ -34,9 +37,7 @@ class PathProjection(Node):
         # "blue": (255, 0, 0),
         "purple": (255, 128, 255)}
 
-    def alive_check(self):
-        
-        pass
+                
 
 
     def robot_info_callback(self, msg: RobotInformation):
@@ -44,16 +45,26 @@ class PathProjection(Node):
         robot.name = msg.name
         robot.priority = msg.priority
         robot.radius = msg.radius
+        time_of_msg = self.get_clock().now()
+        
  
         if not robot.name in self.robots:
             path_subscription = self.create_subscription(Path, robot.name+'/plan', lambda msg: self.save_plan(robot, msg), 10)
             location_subscription = self.create_subscription(Odometry, robot.name+'/odom', self.location_callback, 10)
             index = len(self.robots) 
-            self.robots[robot.name] = {"info": robot, "path_subscription": path_subscription, "location_subscription": location_subscription, "color": list(self.color.values())[index]} 
-
-        
-        self.draw_lines()  
+            self.robots[robot.name] = {"info": robot, "color": list(self.color.values())[index], "time": time_of_msg.to_msg()}  
     
+        self.robots[robot.name] = {"time": time_of_msg.to_msg()}
+
+    def alive_check(self):
+        current_time = self.get_clock().now().to_msg()
+        robots_copy = copy.copy(self.robots)
+        for r in robots_copy:
+            last_msg_time = self.robots[r]["time"]
+            if (current_time.sec - last_msg_time.sec) > 4:
+                self.robots.pop(r)
+                print(r, " has lost connection")
+
 
     def save_plan(self, robot: RobotInformation, msg: Path):
         self.robots[robot.name]["path"] = msg.poses
@@ -123,8 +134,8 @@ class PathProjection(Node):
                     add_y = int(np.cos(robot_orientation_z)*circle_radius)
                     cv2.line(frame, (pos_x, pos_y), (pos_x+add_x,pos_y+add_y), (0, 150, 0), 2) """
 
-        cv2.namedWindow('map', cv2.WND_PROP_FULLSCREEN)
-        cv2.setWindowProperty('map', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        #cv2.namedWindow('map', cv2.WND_PROP_FULLSCREEN)
+        #cv2.setWindowProperty('map', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.imshow("map", frame)
         cv2.waitKey(1)
 
