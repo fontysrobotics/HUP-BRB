@@ -26,7 +26,7 @@ namespace priority_based_robot_costmap_plugin
 {
 
 double calcCost(double distance, double radius){
-  const double percentage = 0.5;
+  const double percentage = 0.3;
   return 255 * ( 1 + (((radius * (1 - percentage))-distance) / (radius * percentage)));
 }
 
@@ -109,7 +109,7 @@ RobotCollisionLayer::updateCosts(
   auto costmap = layered_costmap_->getCostmap();
 
   for (int i = min_i; i < max_i; i++) {
-    for (int j = -min_j; j < max_j; j++) {
+    for (int j = min_j; j < max_j; j++) {
       double wi, wj;
       master_grid.mapToWorld(i,j, wi,wj);
 

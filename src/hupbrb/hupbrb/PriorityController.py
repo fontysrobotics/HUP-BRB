@@ -34,7 +34,8 @@ class PriorityController(Node):
         # self.tf_listener = TransformListener(self.tf_buffer, self)
 
         self.id_publisher = self.create_publisher(RobotInformation, '/robot_info', 10)                          #publisher for projector node
-        self.collision_publisher = self.create_publisher(Collision, 'global_costmap/collision_point', 10)
+        self.global_collision_publisher = self.create_publisher(Collision, 'global_costmap/collision_point', 10)
+        self.local_collision_publisher = self.create_publisher(Collision, 'local_costmap/collision_point', 10)
 
         timer_period = 0.5#0.2  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
@@ -80,18 +81,20 @@ class PriorityController(Node):
                     v2 = self.robots[bot]['results']['odom'].twist.twist.linear
                     
 
-                    collision = get_collision_coords(x1, y1, v1, x2, y2, v2, 0.4)
+                    collision = get_collision_coords(x1, y1, v1, x2, y2, v2, 0.35)
 
                     # self.get_logger().info(f"Collision: {collision}")
 
                     msg = Collision()
+                    msg.enabled = True
+
 
                     if collision == True:
                         #Connection should be killed
-                        self.get_logger().info(f"Unsubscribing...\n")
-                        msg.enabled = False
-                        self.kill_bot(bot)
-                        self.collision_publisher.publish(msg)
+                        # self.get_logger().info(f"Unsubscribing...\n")
+                        # msg.enabled = False
+                        # self.kill_bot(bot)
+                        # self.collision_publisher.publish(msg)
                         break
                         
                     elif collision:
@@ -121,8 +124,11 @@ class PriorityController(Node):
                             # self.get_logger().info(f"Coord <map>: ({coord})")
                             msg.radius = 1.0
                             msg.enabled = True
-                            msg.point.x = x + 0.9*msg.radius*cos(pi/2 + angle)
-                            msg.point.y = y + 0.9*msg.radius*sin(pi/2 + angle)
+                            msg.point.x = x + 0.8*msg.radius*cos(pi/2 + angle)
+                            msg.point.y = y + 0.8*msg.radius*sin(pi/2 + angle)
+                            self.global_collision_publisher.publish(msg)
+                            self.local_collision_publisher.publish(msg)
+
                             
                         except TransformException as ex:
                             self.get_logger().info(
@@ -136,7 +142,6 @@ class PriorityController(Node):
                         # no collision detected yet, possible in future..
                         pass
 
-                    self.collision_publisher.publish(msg)
 
                     # if not hasattr(self, 'plt'):
                     #     self.plt = Graph(self.info.name)
