@@ -11,10 +11,10 @@ from nav2_common.launch import RewrittenYaml
 
 def generate_launch_description():
     # Paramater Setup
-    namespace = os.uname().nodename
-    # LaunchConfiguration('namespace')
-    # namespace_arg = DeclareLaunchArgument('namespace',
-    #     description='The name of the launching robot.')
+    namespace =  LaunchConfiguration('namespace', default=os.uname().nodename)
+    namespace_arg = DeclareLaunchArgument('namespace',
+        default_value=namespace,
+        description='The name of the launching robot.')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     use_sim_time_arg = DeclareLaunchArgument(
