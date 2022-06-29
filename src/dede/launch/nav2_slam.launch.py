@@ -99,6 +99,7 @@ def generate_launch_description():
             executable='recoveries_server',
             name='recoveries_server',
             namespace=namespace,
+            remappings= [ *remap_tf, *remap_scan_and_map ],
             output='screen',
             parameters=[
                 YamlWithNamespace("/recoveries.yaml"),
@@ -122,6 +123,7 @@ def generate_launch_description():
             executable='waypoint_follower',
             name='waypoint_follower',
             namespace=namespace,
+            remappings= [ *remap_tf ],
             output='screen',
             parameters=[
                 YamlWithNamespace("/waypoint.yaml"),

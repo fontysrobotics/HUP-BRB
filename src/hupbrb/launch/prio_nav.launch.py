@@ -72,6 +72,19 @@ def generate_launch_description():
         output='screen',
     )
 
+    camera_node = Node(
+        package='usb_cam',
+        executable='usb_cam_node_exe',
+        namespace=[namespace, '/camera'],
+        parameters=[
+            os.path.join(
+                get_package_share_directory('hupbrb'),
+                'config',
+                'camera.yaml')
+        ],
+        output='screen',
+    )
+
     turtlebot3 = Node(
         package='turtlebot3_node',
         executable='turtlebot3_ros',
@@ -122,6 +135,8 @@ def generate_launch_description():
     ld.add_action(use_sim_time_arg)
 
     ld.add_action(turtlebot3)
+    ld.add_action(camera_node)
+    
     ld.add_action(turtle_state_publisher)
     ld.add_action(scanner_node)
     ld.add_action(priority_node)
