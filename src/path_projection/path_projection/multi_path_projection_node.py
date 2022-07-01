@@ -22,9 +22,7 @@ class PathProjection(Node):
         super().__init__('path_projection')
 
         self.robotinformation_subscription = self.create_subscription(RobotInformation, '/robot_info', self.robot_info_callback, 10)
-        self.drawer_timer = self.create_timer(2, self.draw_lines)
-
-        self.alive_check_timer = self.create_timer(4, self.alive_check)
+        self.drawer_timer = self.create_timer(0.5, self.tick)
 
         self.RobotLocation = None
         self.RobotOrientation = None
@@ -37,9 +35,6 @@ class PathProjection(Node):
         # "blue": (255, 0, 0),
         "purple": (255, 128, 255)}
 
-                
-
-
     def robot_info_callback(self, msg: RobotInformation):
         robot = RobotInformation()
         robot.name = msg.name
@@ -49,26 +44,42 @@ class PathProjection(Node):
         
  
         if not robot.name in self.robots:
-            path_subscription = self.create_subscription(Path, robot.name+'/plan', lambda msg: self.save_plan(robot, msg), 10)
-            location_subscription = self.create_subscription(Odometry, robot.name+'/odom', self.location_callback, 10)
+            global_path_sub = self.create_subscription(Path, robot.name+'/plan', lambda msg: self.save_plan(robot, msg), 10)
+            local_path_sub = self.create_subscription(Odometry, robot.name+'/odom', self.location_callback, 10)
+            
             index = len(self.robots) 
-            self.robots[robot.name] = {"info": robot, "color": list(self.color.values())[index], "time": time_of_msg.to_msg()}  
+            self.robots[robot.name] = {
+                "info": robot,
+                "color": list(self.color.values())[index],
+                "time": time_of_msg.to_msg(),
+                "global_path_sub": global_path_sub,
+                "local_path_sub": local_path_sub,
+                }  
     
-        self.robots[robot.name] = {"time": time_of_msg.to_msg()}
-
-    def alive_check(self):
-        current_time = self.get_clock().now().to_msg()
-        robots_copy = copy.copy(self.robots)
-        for r in robots_copy:
-            last_msg_time = self.robots[r]["time"]
-            if (current_time.sec - last_msg_time.sec) > 4:
-                self.robots.pop(r)
-                print(r, " has lost connection")
-
+        self.robots[robot.name]["time"] = time_of_msg.to_msg()
 
     def save_plan(self, robot: RobotInformation, msg: Path):
         self.robots[robot.name]["path"] = msg.poses
         print(robot.name)
+
+    def tick(self):
+        self.alive_check()
+        self.draw_lines()
+
+    def alive_check(self):
+        stillAlive = {}
+
+        current_time = self.get_clock().now().to_msg()
+        for r in self.robots:
+            rob = self.robots[r]
+            if (current_time.sec - rob["time"].sec) < 4:
+                stillAlive[r] = rob
+            else: 
+                self.get_logger().info(f"Robot {r} has been disconnected.")
+                rob["global_path_sub"].destroy()
+                rob["local_path_sub"].destroy()
+                
+        self.robots = stillAlive
 
     def draw_lines(self):
         NUM_VERT = 4
@@ -84,7 +95,6 @@ class PathProjection(Node):
         pt1 = (offset, 0)
         pt2 = ((pt1[0]+window_x), window_y)
         cv2.rectangle(frame, pt1, pt2, (255, 0, 0), 3)
-
         for x in self.robots:
             points = []
             empty = []
@@ -114,7 +124,6 @@ class PathProjection(Node):
                 THICKNESS = 5
                 CROSS_SIDE = 25
                 color= self.robots[x]["color"]
-
                 cv2.polylines(frame, [out], isClosed = False, color = color, thickness = THICKNESS)
                 #cv2.polylines(frame, [points], isClosed = False, color = (0, 0, 255), thickness = 1)
 
@@ -134,8 +143,8 @@ class PathProjection(Node):
                     add_y = int(np.cos(robot_orientation_z)*circle_radius)
                     cv2.line(frame, (pos_x, pos_y), (pos_x+add_x,pos_y+add_y), (0, 150, 0), 2) """
 
-        #cv2.namedWindow('map', cv2.WND_PROP_FULLSCREEN)
-        #cv2.setWindowProperty('map', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+        cv2.namedWindow('map', cv2.WND_PROP_FULLSCREEN)
+        cv2.setWindowProperty('map', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         cv2.imshow("map", frame)
         cv2.waitKey(1)
 
