@@ -16,6 +16,12 @@ def generate_launch_description():
         description='The name of the launching robot.',
         default_value=os.uname().nodename)
 
+    priority = LaunchConfiguration('priority', default="5")
+    priority_arg = DeclareLaunchArgument('priority',
+        description='The priority of this node 1 to 5 (higher has more priority).',
+        default_value="5")
+
+
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     use_sim_time_arg = DeclareLaunchArgument(
         'use_sim_time',
@@ -69,6 +75,9 @@ def generate_launch_description():
         package='hupbrb',
         executable='prio_controller',
         namespace=namespace,
+        parameters=[
+            {"priority": priority}
+        ],
         output='screen',
     )
 
@@ -134,6 +143,7 @@ def generate_launch_description():
     # ld.add_action(tb3_param_dir_arg)
     ld.add_action(use_sim_time_arg)
     ld.add_action(namespace_arg)
+    ld.add_action(priority_arg)
 
     # ld.add_action(turtlebot3)
     # ld.add_action(camera_node)

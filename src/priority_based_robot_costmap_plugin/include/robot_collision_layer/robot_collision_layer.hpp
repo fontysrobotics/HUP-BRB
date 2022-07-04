@@ -8,7 +8,7 @@
 #include "nav2_costmap_2d/costmap_layer.hpp"
 #include "rclcpp/rclcpp.hpp"
 
-#include "hupbrb_msgs/msg/collision.hpp"
+#include "hupbrb_msgs/msg/no_go_circle.hpp"
 #include "geometry_msgs/msg/point.hpp"
 
 namespace priority_based_robot_costmap_plugin
@@ -57,8 +57,8 @@ private:
 
   double collision_x, collision_y;
 
-  void topic_callback(const hupbrb_msgs::msg::Collision::SharedPtr msg);
-  rclcpp::Subscription<hupbrb_msgs::msg::Collision>::SharedPtr subscription_;
+  void topic_callback(const hupbrb_msgs::msg::NoGoCircle::SharedPtr msg);
+  rclcpp::Subscription<hupbrb_msgs::msg::NoGoCircle>::SharedPtr subscription_;
 };
 
 }  // namespace priority_based_robot_costmap_plugin

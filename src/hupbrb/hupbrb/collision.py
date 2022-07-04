@@ -55,11 +55,11 @@ def get_collision_coords(x1 : List[float], y1 : List[float], v1: Vector3, x2 : L
     y = 0.5* (y1[n_collision] + y2[n_collision])
 
     angle = atan(disty[n_collision]/distx[n_collision])
-    
+
     angle = angle + pi if distx[n_collision]>0 else angle
 
 
-    return x, y, angle
+    return (x1[n_collision], y1[n_collision]), (x2[n_collision], y2[n_collision])
     return (x, y, dist[np.min(n_collision)])
 
     self.mindist.set_data([x1[nmin], x2[nmin]], [y1[nmin], y2[nmin]])
@@ -200,7 +200,13 @@ def get_collision_coords(x1 : List[float], y1 : List[float], v1: Vector3, x2 : L
 #     #     ax=ax[1, 1],
 #     #     label="Time [s]",
 #     #     valmin=0,
-#     #     valmax=max(t),
+#     #     valmax=max(t),d
 #     #     valinit=t[nmin]
 #     # )
 #     # slider.on_changed(update)
+
+def EulerToQuat(angle : float) -> Tuple[float, float]:
+    return np.sin(angle/2), np.cos(angle/2)
+
+def QuatToEuler(z :float, w : float) -> float:
+    return np.arctan2(2*w*z, 1 - (2*z*z))

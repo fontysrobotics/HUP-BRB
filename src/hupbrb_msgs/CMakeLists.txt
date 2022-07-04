@@ -32,8 +32,9 @@ if(BUILD_TESTING)
 endif()
 
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/Collision.msg"
+  "msg/CollisionPoint.msg"
   "msg/Identifier.msg"
+  "msg/NoGoCircle.msg"
   "msg/Priority.msg"
   "msg/RobotInformation.msg"
   "srv/Handshake.srv"

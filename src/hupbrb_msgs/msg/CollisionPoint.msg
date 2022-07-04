@@ -1,0 +1,3 @@
+geometry_msgs/Point this_point
+geometry_msgs/Point that_point
+RobotInformation robot_info

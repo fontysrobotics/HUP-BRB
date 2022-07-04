@@ -27,7 +27,7 @@ setup(
         'console_scripts': [
             'id_scanner = hupbrb.IdScanner:main',
             'prio_controller = hupbrb.PriorityController:main',
-            'collision_detection = hupbrb.CollisionDetection:main',
+            'critical_point = hupbrb.CriticalPointController:main',
         ],
     },
 )

@@ -14,7 +14,7 @@ def generate_launch_description():
 
     # File paths
     dede_share = get_package_share_directory('dede')
-    world_sdf = os.path.join(dede_share, 'worlds', 'open_space.world')
+    world_sdf = [dede_share, '/worlds/', world_param]
     robot_sdf = os.path.join(dede_share, 'models', 'dede', 'model.sdf')
     robot_urdf = os.path.join(dede_share, 'urdf', "dede.urdf")
 
@@ -32,7 +32,8 @@ def generate_launch_description():
     # Define robots
     robot_define = [
         {"name" : "dede1", "pose_x": "1.0", "pose_y": "1.0", "pose_z": "0.1", "roll": "0.0", "pitch": "0.0", "yaw": "0.0"},
-        {"name" : "dede2", "pose_x": "2.0", "pose_y": "1.0", "pose_z": "0.1", "roll": "0.0", "pitch": "0.0", "yaw": "0.0"}
+        {"name" : "dede2", "pose_x": "2.0", "pose_y": "1.0", "pose_z": "0.1", "roll": "0.0", "pitch": "0.0", "yaw": "0.0"},
+        # {"name" : "dede3", "pose_x": "1.0", "pose_y": "2.0", "pose_z": "0.1", "roll": "0.0", "pitch": "0.0", "yaw": "0.0"},
     ]
 
     # Spawn robots

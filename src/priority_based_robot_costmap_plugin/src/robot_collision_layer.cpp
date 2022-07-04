@@ -5,7 +5,7 @@
  *********************************************************************/
 #include "robot_collision_layer/robot_collision_layer.hpp"
 
-#include "hupbrb_msgs/msg/collision.hpp"
+#include "hupbrb_msgs/msg/no_go_circle.hpp"
 #include "geometry_msgs/msg/point.hpp"
 
 #include "rclcpp/rclcpp.hpp"
@@ -26,7 +26,7 @@ namespace priority_based_robot_costmap_plugin
 {
 
 double calcCost(double distance, double radius){
-  const double percentage = 0.3;
+  const double percentage = 0.5;
   return 255 * ( 1 + (((radius * (1 - percentage))-distance) / (radius * percentage)));
 }
 
@@ -51,11 +51,11 @@ RobotCollisionLayer::onInitialize()
   need_recalculation_ = false;
   current_ = true;
   
-  subscription_ = node_->create_subscription<hupbrb_msgs::msg::Collision>(
+  subscription_ = node_->create_subscription<hupbrb_msgs::msg::NoGoCircle>(
     "collision_point", 10, std::bind(&RobotCollisionLayer::topic_callback, this, std::placeholders::_1));
 }
 
-void RobotCollisionLayer::topic_callback(const hupbrb_msgs::msg::Collision::SharedPtr msg)
+void RobotCollisionLayer::topic_callback(const hupbrb_msgs::msg::NoGoCircle::SharedPtr msg)
 {
   if (msg->enabled) {
     RCLCPP_INFO(node_->get_logger(), "Collision expected at: '%lf, %lf'", msg->point.x, msg->point.y);

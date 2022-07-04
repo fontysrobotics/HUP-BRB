@@ -52,7 +52,16 @@ def generate_launch_description():
         "recoveries" : "recoveries.yaml",
         "bt_navigator_config": "bt_navigator.yaml", 
         "bt_navigator_tree": "navigate_w_replanning_and_recovery.xml",
-        "waypoint_follower" : "waypoint.yaml"}
+        "waypoint_follower" : "waypoint.yaml"},
+        # {"name" : "dede3",
+        # "robot_pose" : [1.0, 2.0, 0.1],
+        # "slam": "localization.yaml",
+        # "controller": "controller_dwb.yaml",
+        # "planner": "planner.yaml",
+        # "recoveries" : "recoveries.yaml",
+        # "bt_navigator_config": "bt_navigator.yaml", 
+        # "bt_navigator_tree": "navigate_w_replanning_and_recovery.xml",
+        # "waypoint_follower" : "waypoint.yaml"},
     ]
 
     # Spawn Navigation
