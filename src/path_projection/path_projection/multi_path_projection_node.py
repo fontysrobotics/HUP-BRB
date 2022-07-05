@@ -119,7 +119,6 @@ class PathProjection(Node):
                 dest_x, dest_y = points[-1].astype(int)
                 start_x, start_y = points[0].astype(int)
 
-                circle_radius = int((robot_radius/map_y)*window_y)
 
                 THICKNESS = 5
                 CROSS_SIDE = 25
@@ -130,7 +129,12 @@ class PathProjection(Node):
                 cv2.line(frame, (dest_x - CROSS_SIDE, dest_y - CROSS_SIDE), (dest_x + CROSS_SIDE, dest_y + CROSS_SIDE), color=(255,)*3, thickness=THICKNESS)
                 cv2.line(frame, (dest_x - CROSS_SIDE, dest_y + CROSS_SIDE), (dest_x + CROSS_SIDE, dest_y - CROSS_SIDE), color=(255,)*3, thickness=THICKNESS)
                 
-                cv2.circle(frame, (start_x, start_y), circle_radius, self.robots[x]["color"], THICKNESS)
+                # Clear the place where the circle is going
+                priority = self.robots[x]["info"].priority
+                cv2.circle(frame, (start_x, start_y),  10 + (priority -1) * 6, (0,0,0), -1)
+
+                for i in range(priority):
+                    cv2.circle(frame, (start_x, start_y), 10 + (6 * i), self.robots[x]["color"], 2)
 
                
 
