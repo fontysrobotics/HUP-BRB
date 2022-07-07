@@ -1,6 +1,7 @@
 # HUP-BRB
 Human Understandable Priority Based Robot Behavior. This repository is part of the Holland Robotics &amp; Logistiek project.
 
+What we did can be found here: https://youtu.be/TVuYbK3PcoQ
 
 All the Ros code is in master. Of example the priority controller and the navigation plugin!!!
 
