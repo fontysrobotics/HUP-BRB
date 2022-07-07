@@ -2,6 +2,8 @@
 Human Understandable Priority Based Robot Behavior. This repository is part of the Holland Robotics &amp; Logistiek project.
 
 
+All the Ros code is in master. Of example the priority controller and the navigation plugin!!!
+
 In this branch of the git hub repository, you can find the code and the CAD files for the picolaser project. The cad files are in kicad and the code is in written in C. if you would like to continue on this project the easiest steps to take are to be on Linux and follow the install guide on the raspberry pi pico sdk. The install guide can be found with this URL:
 
 https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-c-sdk.pdf
