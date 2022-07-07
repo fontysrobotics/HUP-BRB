@@ -51,5 +51,5 @@ The cross of the destonation is displayed by #2 and #3, each one line of the X.
 The circle of the robot location is drawn with #4. 
 
 The final result should look something like this:
-![alt text](https://github.com/fontysrobotics/HUP-BRB/blob/multi_path_projection/MicrosoftTeams-image(3).png?raw=true)
+![alt text](https://github.com/fontysrobotics/HUP-BRB/blob/multi_path_projection/src/path_projection/MicrosoftTeams-image%20(3).png)
 
